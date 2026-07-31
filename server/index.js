@@ -61,6 +61,27 @@ async function loadPdf() {
   console.log(`Loaded PDF: ${chunks.length} chunks`);
 }
 
+function cleanAnswer(text) {
+  if (!text) return text;
+  let out = text
+    .replace(/\*\*([^*]+)\*\*/g, "$1")
+    .replace(/__([^_]+)__/g, "$1")
+    .replace(/\*([^*]+)\*/g, "$1")
+    .replace(/_([^_]+)_/g, "$1")
+    .replace(/`([^`]+)`/g, "$1")
+    .replace(/^#{1,6}\s*/gm, "")
+    .replace(/\s{2,}/g, " ")
+    .split("\n")
+    .map((line) => {
+      const bullet = line.trim().match(/^[-*•]\s+(.*)$/);
+      if (bullet) return "🍿 " + bullet[1];
+      return line.trim();
+    })
+    .filter(Boolean)
+    .join("\n");
+  return out.trim();
+}
+
 app.post("/chat", async (req, res) => {
   try {
     const { question } = req.body;
@@ -70,6 +91,11 @@ app.post("/chat", async (req, res) => {
       model: "openrouter/auto", // ⭐ FREE MODEL
       messages: [
         {
+          role: "system",
+          content:
+            "You are CineRAG, a friendly movie assistant. Answer in clean, simple, plain text. Do NOT use markdown symbols such as *, **, #, or backticks. Keep answers short and easy to read. Use a few friendly emojis (like 🎬 🍿 ⭐ 👍) to make the answer lively.",
+        },
+        {
           role: "user",
           content: `Use this movie data to answer the question. Only use the data given below.\n\nDATA:\n${context}\n\nQUESTION: ${question}`,
         },
@@ -77,7 +103,7 @@ app.post("/chat", async (req, res) => {
       max_tokens: 1000,
     });
 
-    res.json({ answer: completion.choices[0].message.content });
+    res.json({ answer: cleanAnswer(completion.choices[0].message.content) });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Something went wrong" });

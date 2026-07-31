@@ -21,10 +21,10 @@ html, body {
   min-height: 100vh;
   background-color: #050508;
   background-image: 
-    radial-gradient(circle at 50% 50%, rgba(124, 58, 237, 0.1) 0%, transparent 60%),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    radial-gradient(circle at 50% 50%, rgba(255, 77, 158, 0.12) 0%, transparent 60%),
+    linear-gradient(to bottom, rgba(255, 77, 158, 0.03) 1px, transparent 1px);
   background-size: 100% 100%, 100% 24px;
-  color: #e2e8f0;
+  color: #ffd1e8;
   font-family: 'Fira Code', monospace;
   overflow-x: hidden;
 }
@@ -48,10 +48,10 @@ html, body {
   max-height: 98vh;    /* Expanded upper ceiling */
   background-color: #0a0a0f;
   border-radius: 12px;
-  border: 1px solid rgba(0, 255, 204, 0.25);
+  border: 1px solid rgba(255, 77, 158, 0.25);
   box-shadow: 
-    0 0 20px rgba(0, 255, 204, 0.15),
-    0 0 40px rgba(124, 58, 237, 0.15);
+    0 0 20px rgba(255, 77, 158, 0.15),
+    0 0 40px rgba(255, 77, 158, 0.15);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -63,12 +63,12 @@ html, body {
    ========================================================================== */
 .chat-header {
   background: #0d0b18;
-  border-bottom: 2px solid #00ffcc;
+  border-bottom: 2px solid #ff4d9e;
   padding: 16px 24px;
   display: flex;
   flex-direction: column;
   gap: 8px;
-  box-shadow: 0 4px 15px rgba(0, 255, 204, 0.1);
+  box-shadow: 0 4px 15px rgba(255, 77, 158, 0.1);
 }
 
 .chat-header h2 {
@@ -76,8 +76,8 @@ html, body {
   font-weight: 800;
   font-size: 24px;
   letter-spacing: 2px;
-  color: #00ffcc;
-  text-shadow: 0 0 8px rgba(0, 255, 204, 0.6);
+  color: #ff4d9e;
+  text-shadow: 0 0 8px rgba(255, 77, 158, 0.6);
   text-transform: uppercase;
 }
 
@@ -101,31 +101,30 @@ html, body {
 }
 
 .message {
-  max-width: 70%;
+  max-width: 85%;
   padding: 14px 18px;
-  border-radius: 4px;
+  border-radius: 16px;
   font-size: 14px;
-  line-height: 1.5;
+  line-height: 1.6;
   word-wrap: break-word;
   position: relative;
 }
 
 .message.bot {
   align-self: flex-start;
-  background-color: #121024;
-  color: #00ffcc;
-  border: 1px solid rgba(0, 255, 204, 0.3);
-  border-left: 4px solid #00ffcc;
-  box-shadow: 0 2px 10px rgba(0, 255, 204, 0.05);
+  background-color: #1c1220;
+  color: #ffd1e8;
+  border: 1px solid rgba(255, 77, 158, 0.18);
+  border-top-left-radius: 4px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
 }
 
 .message.user {
   align-self: flex-end;
-  background-color: #1f092b;
-  color: #ff77c6;
-  border: 1px solid rgba(255, 0, 127, 0.4);
-  border-right: 4px solid #ff007f;
-  box-shadow: 0 2px 10px rgba(255, 0, 127, 0.1);
+  background: linear-gradient(135deg, #ff5fa8, #ff2f92);
+  color: #ffffff;
+  border-top-right-radius: 4px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
 }
 
 .typing-indicator {
@@ -144,8 +143,8 @@ html, body {
 }
 
 .sentiment-positive {
-  background: rgba(0, 255, 204, 0.15);
-  color: #00ffcc;
+  background: rgba(255, 77, 158, 0.15);
+  color: #ff4d9e;
 }
 
 .sentiment-negative {
@@ -167,13 +166,13 @@ html, body {
   gap: 8px;
   padding: 12px 20px;
   background-color: #080711;
-  border-top: 1px dashed rgba(0, 255, 204, 0.2);
+  border-top: 1px dashed rgba(255, 77, 158, 0.2);
 }
 
 .suggestion-chip {
-  background: rgba(124, 58, 237, 0.15);
-  color: #a78bfa;
-  border: 1px solid rgba(124, 58, 237, 0.4);
+  background: rgba(255, 77, 158, 0.15);
+  color: #ff9ecb;
+  border: 1px solid rgba(255, 77, 158, 0.4);
   border-radius: 16px;
   padding: 6px 14px;
   font-family: 'Fira Code', monospace;
@@ -192,11 +191,11 @@ html, body {
 }
 
 .suggestion-chip:hover {
-  background: rgba(0, 255, 204, 0.2);
-  color: #00ffcc;
-  border-color: #00ffcc;
+  background: rgba(255, 77, 158, 0.2);
+  color: #ff4d9e;
+  border-color: #ff4d9e;
   transform: translateY(-2px);
-  box-shadow: 0 2px 8px rgba(0, 255, 204, 0.25);
+  box-shadow: 0 2px 8px rgba(255, 77, 158, 0.25);
 }
 
 .suggestion-chip:active {
@@ -207,7 +206,7 @@ html, body {
    ========================================================================== */
 .typing-indicator {
   font-style: italic;
-  color: #00ffcc !important;
+  color: #ff4d9e !important;
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -218,11 +217,11 @@ html, body {
 @keyframes pulseGlow {
   0%, 100% {
     opacity: 0.6;
-    text-shadow: 0 0 2px rgba(0, 255, 204, 0.2);
+    text-shadow: 0 0 2px rgba(255, 77, 158, 0.2);
   }
   50% {
     opacity: 1;
-    text-shadow: 0 0 10px rgba(0, 255, 204, 0.8);
+    text-shadow: 0 0 10px rgba(255, 77, 158, 0.8);
   }
 }
 
@@ -236,7 +235,7 @@ html, body {
 .loading-dots span {
   width: 4px;
   height: 4px;
-  background-color: #00ffcc;
+  background-color: #ff4d9e;
   border-radius: 50%;
   display: inline-block;
   animation: bounce 1.4s infinite ease-in-out both;
@@ -264,7 +263,7 @@ html, body {
   gap: 12px;
   padding: 16px 20px;
   background: #0d0b18;
-  border-top: 2px solid #00ffcc;
+  border-top: 2px solid #ff4d9e;
 }
 
 .chat-input-area input {
@@ -272,9 +271,9 @@ html, body {
   padding: 12px 16px;
   font-family: 'Fira Code', monospace;
   font-size: 0.95rem;
-  color: #00ffcc;
+  color: #ff4d9e;
   background: #050508;
-  border: 1px solid rgba(0, 255, 204, 0.3);
+  border: 1px solid rgba(255, 77, 158, 0.3);
   border-radius: 4px;
   outline: none;
   transition: all 0.2s ease;
@@ -285,12 +284,12 @@ html, body {
 }
 
 .chat-input-area input:hover {
-  border-color: rgba(0, 255, 204, 0.6);
+  border-color: rgba(255, 77, 158, 0.6);
 }
 
 .chat-input-area input:focus {
-  border-color: #00ffcc;
-  box-shadow: 0 0 10px rgba(0, 255, 204, 0.3);
+  border-color: #ff4d9e;
+  box-shadow: 0 0 10px rgba(255, 77, 158, 0.3);
 }
 
 .chat-input-area button {
@@ -303,11 +302,11 @@ html, body {
   font-size: 0.85rem;
   letter-spacing: 1px;
   color: #050508;
-  background: #00ffcc;
+  background: #ff4d9e;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  box-shadow: 0 0 12px rgba(0, 255, 204, 0.4);
+  box-shadow: 0 0 12px rgba(255, 77, 158, 0.4);
   transition: all 0.2s ease;
   text-transform: uppercase;
 }
@@ -316,4 +315,9 @@ html, body {
   background: #ff007f;
   color: #ffffff;
   box-shadow: 0 0 15px rgba(255, 0, 127, 0.6);
+}
+
+.chat-input-area button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
