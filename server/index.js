@@ -3,12 +3,10 @@ import cors from "cors";
 import fs from "fs";
 import dotenv from "dotenv";
 import pdfParse from "pdf-parse";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import OpenAI from "openai";
 
 dotenv.config();
-console.log("Loaded key:", process.env.GEMINI_API_KEY ? "✅ Found" : "❌ Missing");
-
-
+console.log("Loaded key:", process.env.OPENROUTER_API_KEY ? "✅ Found" : "❌ Missing");
 
 const app = express();
 app.use(cors());
@@ -16,12 +14,18 @@ app.use(express.json());
 
 // Root route
 app.get("/", (req, res) => {
-  res.send("🎬 CineRAG server is running!");
+  res.send("🎬 CineRAG server is running with OpenRouter!");
 });
 
-// Gemini client
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
+// OpenRouter client
+const openrouter = new OpenAI({
+  apiKey: process.env.OPENROUTER_API_KEY,
+  baseURL: "https://openrouter.ai/api/v1",
+  defaultHeaders: {
+    "HTTP-Referer": "http://localhost:5173", // optional, shows up in dashboard
+    "X-Title": "CineRAG",                    // optional
+  },
+});
 
 let chunks = [];
 
@@ -57,32 +61,29 @@ async function loadPdf() {
   console.log(`Loaded PDF: ${chunks.length} chunks`);
 }
 
-// Chat endpoint
 app.post("/chat", async (req, res) => {
   try {
     const { question } = req.body;
     const context = getTopChunks(question).join("\n\n---\n\n");
 
-    const prompt = `
-You are CineRAG. Answer ONLY using the data below.
-If the answer is not in the data, say "I don't know."
+    const completion = await openrouter.chat.completions.create({
+      model: "openrouter/auto", // ⭐ FREE MODEL
+      messages: [
+        {
+          role: "user",
+          content: `Use this movie data to answer the question. Only use the data given below.\n\nDATA:\n${context}\n\nQUESTION: ${question}`,
+        },
+      ],
+      max_tokens: 1000,
+    });
 
-DATA:
-${context}
-
-QUESTION:
-${question}
-`;
-
-    const result = await model.generateContent(prompt);
-    const answer = result.response.text();
-
-    res.json({ answer });
+    res.json({ answer: completion.choices[0].message.content });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Something went wrong" });
   }
 });
+
 
 // Start server
 loadPdf()
