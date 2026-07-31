@@ -208,16 +208,25 @@
     // Show animated indicator while generating
     showTyping();
 
-    // Simulated API response delay
-    setTimeout(() => {
-      hideTyping();
-      
-      // Clean response content (replace with actual backend answer later)
-      addMessage("Here is the information retrieved for your movie query.", 'bot');
-      
-      sendBtn.disabled = false;
-      chatInput.focus();
-    }, 1200);
+fetch("http://localhost:8000/chat", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ question: text })
+})
+  .then(res => res.json())
+  .then(data => {
+    hideTyping();
+    addMessage(data.answer, 'bot');   // ← REAL answer from your notes
+    sendBtn.disabled = false;
+    chatInput.focus();
+  })
+  .catch(err => {
+    hideTyping();
+    addMessage("⚠️ Error contacting CineRAG server.", 'bot');
+    console.error(err);
+    sendBtn.disabled = false;
+  });
+
   }
 
   function handleSuggestionClick(promptText) {

@@ -1,7 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react';
-import './index.css';
+import Chat from "./components/Chat";
 
 export default function App() {
+<<<<<<< HEAD
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -145,3 +145,7 @@ export default function App() {
     </div>
   );
 }
+=======
+  return <Chat />;
+}
+>>>>>>> eb5d5e2 (made changes)
