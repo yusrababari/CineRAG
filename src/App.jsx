@@ -64,7 +64,7 @@ export default function App() {
       const botResponse = {
         id: Date.now() + 1,
         sender: 'bot',
-        text: `Analysis complete: This tweet/message sounds mainly ${detectedSentiment.toLowerCase()}.`,
+        text: `Analysis complete: That sounds mainly ${detectedSentiment.toLowerCase()}.`,
         sentiment: detectedSentiment,
       };
 
