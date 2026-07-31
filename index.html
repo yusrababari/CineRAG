@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CineRAG</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Orbitron:wght@600;800&family=VT323&display=swap" rel="stylesheet">
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    width: 100%; min-height: 100vh; background-color: #050508;
+    background-image:
+      radial-gradient(circle at 50% 50%, rgba(124, 58, 237, 0.1) 0%, transparent 60%),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    background-size: 100% 100%, 100% 24px;
+    color: #e2e8f0; font-family: 'Fira Code', monospace; overflow-x: hidden;
+  }
+  body { display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+  
+  /* Main Container */
+  .chat-container {
+    width: 100%; max-width: 1200px; height: 800px; max-height: 90vh;
+    background-color: #0a0a0f; border-radius: 12px; border: 1px solid rgba(0,255,204,0.25);
+    box-shadow: 0 0 20px rgba(0,255,204,0.15), 0 0 40px rgba(124,58,237,0.15);
+    display: flex; flex-direction: column; overflow: hidden; position: relative;
+  }
+  
+  /* Header */
+  .chat-header {
+    background: #0d0b18; border-bottom: 2px solid #00ffcc; padding: 16px 24px;
+    display: flex; flex-direction: column; gap: 8px; box-shadow: 0 4px 15px rgba(0,255,204,0.1);
+  }
+  .chat-header h2 {
+    font-family: 'Orbitron', sans-serif; font-weight: 800; font-size: 24px; letter-spacing: 2px;
+    color: #00ffcc; text-shadow: 0 0 8px rgba(0,255,204,0.6); text-transform: uppercase;
+  }
+  .chat-header p { font-family: 'Fira Code', monospace; font-size: 13px; color: #94a3b8; }
+  
+  /* Messages Area */
+  .chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; background-color: #060609; }
+  .message { max-width: 75%; padding: 12px 16px; border-radius: 4px; font-size: 13px; line-height: 1.5; word-wrap: break-word; }
+  .message.bot { align-self: flex-start; background-color: #121024; color: #00ffcc; border: 1px solid rgba(0,255,204,0.3); border-left: 4px solid #00ffcc; box-shadow: 0 2px 10px rgba(0,255,204,0.05); }
+  .message.user { align-self: flex-end; background-color: #1f092b; color: #ff77c6; border: 1px solid rgba(255,0,127,0.4); border-right: 4px solid #ff007f; box-shadow: 0 2px 10px rgba(255,0,127,0.1); }
+  
+  /* Typing Indicator & Dots Animation */
+  .typing-indicator {
+    font-style: italic;
+    color: #00ffcc !important;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .loading-dots {
+    display: inline-flex;
+    gap: 3px;
+    margin-left: 4px;
+  }
+  .loading-dots span {
+    width: 4px;
+    height: 4px;
+    background-color: #00ffcc;
+    border-radius: 50%;
+    display: inline-block;
+    animation: bounce 1.4s infinite ease-in-out both;
+  }
+  .loading-dots span:nth-child(1) { animation-delay: -0.32s; }
+  .loading-dots span:nth-child(2) { animation-delay: -0.16s; }
+
+  @keyframes bounce {
+    0%, 80%, 100% { transform: scale(0); opacity: 0.3; }
+    40% { transform: scale(1.2); opacity: 1; }
+  }
+
+  /* Prompt Suggestions Bar */
+  .suggestions-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px 20px;
+    background-color: #080711;
+    border-top: 1px dashed rgba(0, 255, 204, 0.2);
+  }
+  .suggestion-chip {
+    background: rgba(124, 58, 237, 0.15);
+    color: #a78bfa;
+    border: 1px solid rgba(124, 58, 237, 0.4);
+    border-radius: 16px;
+    padding: 6px 14px;
+    font-family: 'Fira Code', monospace;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    outline: none;
+  }
+  .suggestion-chip::before {
+    content: '⚡';
+    font-size: 10px;
+  }
+  .suggestion-chip:hover {
+    background: rgba(0, 255, 204, 0.2);
+    color: #00ffcc;
+    border-color: #00ffcc;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0, 255, 204, 0.25);
+  }
+  .suggestion-chip:active {
+    transform: translateY(0);
+  }
+
+  /* Input Area */
+  .chat-input-area {
+    display: flex; align-items: center; gap: 8px; padding: 16px 20px;
+    background: #0d0b18; border-top: 2px solid #00ffcc;
+  }
+  .chat-input-area input {
+    flex: 1; padding: 10px 14px; font-family: 'Fira Code', monospace; font-size: 0.85rem;
+    color: #00ffcc; background: #050508; border: 1px solid rgba(0,255,204,0.3); border-radius: 4px;
+    outline: none; transition: all 0.2s ease;
+  }
+  .chat-input-area input::placeholder { color: #475569; }
+  .chat-input-area input:hover { border-color: rgba(0,255,204,0.6); }
+  .chat-input-area input:focus { border-color: #00ffcc; box-shadow: 0 0 10px rgba(0,255,204,0.3); }
+  .chat-input-area button {
+    display: inline-flex; align-items: center; justify-content: center; padding: 10px 18px;
+    font-family: 'Orbitron', sans-serif; font-weight: 600; font-size: 0.75rem; letter-spacing: 1px;
+    color: #050508; background: #00ffcc; border: none; border-radius: 4px; cursor: pointer;
+    box-shadow: 0 0 12px rgba(0,255,204,0.4); transition: all 0.2s ease; text-transform: uppercase;
+  }
+  .chat-input-area button:hover { background: #ff007f; color: #ffffff; box-shadow: 0 0 15px rgba(255,0,127,0.6); }
+  .chat-input-area button:disabled { opacity: 0.5; cursor: not-allowed; }
+</style>
+</head>
+<body>
+
+  <div class="chat-container">
+    <div class="chat-header">
+      <h2>CineRAG</h2>
+      <p>🔍 Ask CineRAG about a movie, actor, or plot...</p>
+    </div>
+
+    <div class="chat-messages" id="chatMessages"></div>
+
+    <div class="suggestions-container">
+      <button class="suggestion-chip" onclick="handleSuggestionClick('Recommend a sci-fi thriller')">
+        Recommend a sci-fi thriller
+      </button>
+      <button class="suggestion-chip" onclick="handleSuggestionClick('Who directed Inception?')">
+        Who directed Inception?
+      </button>
+      <button class="suggestion-chip" onclick="handleSuggestionClick('Explain Interstellar plot')">
+        Explain Interstellar plot
+      </button>
+    </div>
+
+    <form class="chat-input-area" id="chatForm">
+      <input type="text" id="chatInput" placeholder="Type your movie question..." autocomplete="off" />
+      <button type="submit" id="sendBtn">Send</button>
+    </form>
+  </div>
+
+<script>
+  const chatMessages = document.getElementById('chatMessages');
+  const chatForm = document.getElementById('chatForm');
+  const chatInput = document.getElementById('chatInput');
+  const sendBtn = document.getElementById('sendBtn');
+
+  function addMessage(text, sender) {
+    const div = document.createElement('div');
+    div.className = `message ${sender}`;
+    const p = document.createElement('p');
+    p.textContent = text;
+    div.appendChild(p);
+    chatMessages.appendChild(div);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+    return div;
+  }
+
+  function showTyping() {
+    const div = document.createElement('div');
+    div.className = 'message bot typing-indicator';
+    div.id = 'typingIndicator';
+    
+    // Shows the animated loading text
+    div.innerHTML = `Generating response<span class="loading-dots"><span></span><span></span><span></span></span>`;
+    
+    chatMessages.appendChild(div);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+  function hideTyping() {
+    const el = document.getElementById('typingIndicator');
+    if (el) el.remove();
+  }
+
+  function submitQuery(text) {
+    if (!text || sendBtn.disabled) return;
+
+    addMessage(text, 'user');
+    chatInput.value = '';
+    sendBtn.disabled = true;
+    
+    // Show animated indicator while generating
+    showTyping();
+
+    // Simulated API response delay
+    setTimeout(() => {
+      hideTyping();
+      
+      // Clean response content (replace with actual backend answer later)
+      addMessage("Here is the information retrieved for your movie query.", 'bot');
+      
+      sendBtn.disabled = false;
+      chatInput.focus();
+    }, 1200);
+  }
+
+  function handleSuggestionClick(promptText) {
+    submitQuery(promptText);
+  }
+
+  chatForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    submitQuery(chatInput.value.trim());
+  });
+</script>
+
+</body>
+</html>
