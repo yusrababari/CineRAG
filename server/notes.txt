@@ -1,0 +1,788 @@
+Movie Knowledge Base
+A structured movie dataset for chatbot / RAG use, modeled on the classic graph-style movie schema: Movie nodes,
+Person nodes (actors & directors), ACTED_IN / DIRECTED relationships, and REVIEWED relationships from sample
+users. All entries below are synthetic (fictional titles and people) so this file is free to reuse, chunk, embed, or fine-tune on
+without licensing concerns.
+Contents: 68 movies · 131 people · 222 relationships · 193 reviews
+Suggested schema for your chatbot: (:Movie {title, year, genres, rating, runtime, language, country, synopsis}), (:Person {name, born}),
+(:Person)-[:ACTED_IN {role}]->(:Movie), (:Person)-[:DIRECTED]->(:Movie), (:Person)-[:REVIEWED {stars, comment}]->(:Movie).
+Section 1 — Movies
+68 entries, sorted by title.
+A Diet of Worms (2005)
+Genres: Drama, History  |  Director: Petra Ullmann  |  Rating: 7.4/10  |  Runtime: 149 min  |  Language: German  |  Country: Germany
+Cast: Wolfgang Ritter as Martin, Marlene Vogt as Katharina
+Blackthorn Manor (1996)
+Genres: Horror, Mystery  |  Director: Persephone Ashcombe  |  Rating: 7.1/10  |  Runtime: 106 min  |  Language: English  |  Country: UK
+Cast: August Sterling as Lord Blackthorn, Rosalind Ferris as Governess Wren
+Blue Ledger (2007)
+Genres: Crime, Drama  |  Director: Franco Bianchi  |  Rating: 8.0/10  |  Runtime: 137 min  |  Language: Italian  |  Country: Italy
+Cast: Enzo Marchetti as Salvatore Greco, Chiara Rinaldi as Detective Nora Bassi, Paolo Conti as Tommaso Greco
+Confetti for Ghosts (2023)
+Genres: Drama, Fantasy  |  Director: Bianca Souza  |  Rating: 8.1/10  |  Runtime: 121 min  |  Language: Portuguese  |  Country: Brazil
+Cast: Caetano Rocha as Joaquim, Isadora Melo as Terezinha
+Copper Wire Choir (2020)
+Genres: Musical, Drama  |  Director: Naledi Mokoena  |  Rating: 8.2/10  |  Runtime: 109 min  |  Language: English  |  Country: South
+Africa
+Cast: Thabo Nkosi as Sipho, Zanele Dube as Nomvula, Kagiso Radebe as Elder Mandla
+Copper and Chalk (2019)
+Genres: Drama, Biography  |  Director: Anneliese Krause  |  Rating: 7.8/10  |  Runtime: 124 min  |  Language: German  |  Country:
+Germany
+Cast: Wolfgang Ritter as Josef, Marlene Vogt as Ilse
+Copperfield Junction (1994)
+Genres: Western, Drama  |  Director: Dale Pruitt  |  Rating: 7.0/10  |  Runtime: 127 min  |  Language: English  |  Country: USA
+Cast: Cole Marrow as Hank Dorsey, Delilah Frost as Sarah Dorsey
+Copperhead County (2003)
+Genres: Crime, Western  |  Director: Wyatt Bracewell  |  Rating: 7.1/10  |  Runtime: 124 min  |  Language: English  |  Country: USA
+Cast: Cole Marrow as Sheriff Ezra Bly, Delilah Frost as Ada Marrow, Silas Cade as Judge Toombs
+Doubling Back (2008)
+Genres: Crime, Drama  |  Director: Wyatt Bracewell  |  Rating: 7.0/10  |  Runtime: 109 min  |  Language: English  |  Country: USA
+Cast: Grant Okafor as Deputy Ruiz, Delilah Frost as Ada Marrow
+Dust and Marigolds (2022)
+Genres: Drama  |  Director: Bianca Souza  |  Rating: 8.0/10  |  Runtime: 116 min  |  Language: Portuguese  |  Country: Brazil
+Cast: Caetano Rocha as Joaquim, Isadora Melo as Terezinha
+Ember and Ash (2018)
+Genres: Fantasy, Adventure  |  Director: Odalys Marin  |  Rating: 7.8/10  |  Runtime: 129 min  |  Language: Spanish  |  Country: Colombia
+Cast: Santiago Roldan as Ash, Valentina Cruz as Ember
+Harbor Lights, Chicago (1998)
+Genres: Drama, Crime  |  Director: Sal Pomeroy  |  Rating: 7.8/10  |  Runtime: 131 min  |  Language: English  |  Country: USA
+Cast: Vincent Marucci as Danny Voss, Renata Pace as Carla Bianchi, Otis Greer as Detective Hall
+Iceberg Protocol (2019)
+Genres: Sci-Fi, Thriller  |  Director: Lena Whitfield  |  Rating: 7.7/10  |  Runtime: 130 min  |  Language: English  |  Country: USA
+Cast: Marcus Aldridge as Dr. Owen Reyes, Tobias Meer as Halcyon 2.0
+Iron Harvest (2011)
+Genres: Action, War  |  Director: Callum Reyes  |  Rating: 7.4/10  |  Runtime: 142 min  |  Language: English  |  Country: USA
+Cast: Dominic Ashworth as Sgt. Ezra Colt, Ines Duarte as Lt. Marisol Vega, Grant Okafor as Cpl. Danny Ruiz
+Synopsis: A supply convoy trapped behind enemy lines must reach a besieged village before winter.
+Mango Season (2016)
+Genres: Comedy, Drama  |  Director: Chidi Obinna  |  Rating: 7.4/10  |  Runtime: 104 min  |  Language: English  |  Country: Nigeria
+Cast: Tunde Bakare as Chuka, Ngozi Achebe as Bisi
+Marigold and Mortar (2006)
+Genres: Drama, Romance  |  Director: Chidi Obinna  |  Rating: 7.7/10  |  Runtime: 108 min  |  Language: English  |  Country: Nigeria
+Cast: Tunde Bakare as Emeka, Ngozi Achebe as Adaeze, Femi Balogun as Baba Sunday
+Meridian Blue (2014)
+Genres: Sci-Fi, Drama  |  Director: Mei Lin Tan  |  Rating: 7.8/10  |  Runtime: 128 min  |  Language: Mandarin  |  Country: China
+Cast: Bo Zhang as Dr. Wei, Xiu Chen as Dr. Ling Fu
+Monsoon Ledger (2019)
+Genres: Drama, Romance  |  Director: Rhea Kapadia  |  Rating: 7.7/10  |  Runtime: 133 min  |  Language: Hindi  |  Country: India
+Cast: Aryan Malhotra as Dev, Ishani Rao as Meher
+Nightshift at the Aquarium (2013)
+Genres: Horror, Mystery  |  Director: Marisol Trejo  |  Rating: 6.9/10  |  Runtime: 96 min  |  Language: Spanish  |  Country: Mexico
+Cast: Diego Falcone as Caretaker Mateo, Yara Aznar as Bea Ontiveros
+Nine Rivers (2005)
+Genres: Adventure, Drama  |  Director: Wataru Endo  |  Rating: 7.9/10  |  Runtime: 149 min  |  Language: Japanese  |  Country: Japan
+Cast: Kenta Aoyama as Ryo, Airi Matsuda as Sumire, Jiro Osako as Captain Fuji
+Northern Static (2020)
+Genres: Thriller, Mystery  |  Director: Aino Jarvinen  |  Rating: 7.5/10  |  Runtime: 110 min  |  Language: Finnish  |  Country: Finland
+Cast: Elias Koskinen as Aleksi, Saana Virtanen as Marja
+Paper Lanterns (2004)
+Genres: Drama, Romance  |  Director: Haruto Ishikawa  |  Rating: 7.8/10  |  Runtime: 111 min  |  Language: Japanese  |  Country: Japan
+Cast: Ren Kobayashi as Aiko, Sana Fujimori as Michiko, Daichi Nomura as Kenji
+Synopsis: Two estranged sisters reunite for a lantern festival and confront a decade of silence.
+Perihelion (2023)
+Genres: Sci-Fi, Adventure  |  Director: Cassandra Yeo  |  Rating: 8.4/10  |  Runtime: 152 min  |  Language: English  |  Country: Singapore
+Cast: Idris Bankole as Cmdr. Osei, Freya Lindqvist as Dr. Marlowe, Wen Zhao as Navigator Su
+Quicksilver Market (2012)
+Genres: Crime, Thriller  |  Director: Mei Lin Tan  |  Rating: 7.6/10  |  Runtime: 119 min  |  Language: Mandarin  |  Country: China
+Cast: Bo Zhang as Inspector Wei, Xiu Chen as Ling, Tao Yuan as Boss Han
+Salt Flats Serenade (2017)
+Genres: Drama, Romance  |  Director: Beatriz Cordero  |  Rating: 7.5/10  |  Runtime: 115 min  |  Language: Spanish  |  Country: Argentina
+Cast: Rafael Ontiveros as Emiliano, Camila Vargas as Luz, Tomas Rivera as Padre Alvaro
+Salted Caramel (2017)
+Genres: Comedy, Romance  |  Director: Josie Tremblay  |  Rating: 6.9/10  |  Runtime: 97 min  |  Language: French  |  Country: Canada
+Cast: Etienne Rousseau as Marc, Camille Aubert as Noelle
+Semaphore (2017)
+Genres: Drama, War  |  Director: Fenella Whitcombe  |  Rating: 7.8/10  |  Runtime: 132 min  |  Language: English  |  Country: UK
+Cast: August Sterling as Lt. Vane, Rosalind Ferris as Nurse Loy
+Static Bloom (2018)
+Genres: Sci-Fi, Drama  |  Director: Priyanka Deshmukh  |  Rating: 7.6/10  |  Runtime: 118 min  |  Language: Hindi  |  Country: India
+Cast: Anil Bhatt as Dr. Rohan Sen, Meera Krishnan as Asha Sen, Farhan Qureshi as Vikram
+Static Horizon (2006)
+Genres: Sci-Fi, Mystery  |  Director: Aino Jarvinen  |  Rating: 7.3/10  |  Runtime: 106 min  |  Language: Finnish  |  Country: Finland
+Cast: Elias Koskinen as Aleksi, Saana Virtanen as Marja
+Static on the Line (2016)
+Genres: Thriller, Drama  |  Director: Devika Sundaram  |  Rating: 7.3/10  |  Runtime: 122 min  |  Language: Tamil  |  Country: India
+Cast: Karthik Iyer as Insp. Suresh, Lakshmi Rao as Deepa
+The Amber Room Cipher (2015)
+Genres: Thriller, Mystery  |  Director: Iulia Popescu  |  Rating: 7.9/10  |  Runtime: 140 min  |  Language: Romanian  |  Country: Romania
+Cast: Radu Constantin as Agent Vlad, Ana Dumitrescu as Dr. Cioban
+The Apiary (2021)
+Genres: Drama  |  Director: Ingrid Solheim  |  Rating: 8.3/10  |  Runtime: 98 min  |  Language: Norwegian  |  Country: Norway
+Cast: Sigrid Falk as Mother Hilde, Espen Rud as Father Anders, Liv Moen as Young Ronja
+The Baroque Detective (2000)
+Genres: Mystery, Comedy  |  Director: Ottavia Serrano  |  Rating: 7.3/10  |  Runtime: 108 min  |  Language: Italian  |  Country: Italy
+Cast: Enzo Marchetti as Insp. Fausto, Chiara Rinaldi as Contessa Bruni
+The Beekeeper's Ledger (2014)
+Genres: Drama, History  |  Director: Anneliese Krause  |  Rating: 7.5/10  |  Runtime: 126 min  |  Language: German  |  Country: Germany
+Cast: Wolfgang Ritter as Josef Baum, Marlene Vogt as Ilse Baum
+The Cane Cutter's Son (2012)
+Genres: Drama  |  Director: Odalys Marin  |  Rating: 7.6/10  |  Runtime: 118 min  |  Language: Spanish  |  Country: Cuba
+Cast: Santiago Roldan as Ignacio, Valentina Cruz as Rosa
+The Cardamom Trade (2013)
+Genres: Drama  |  Director: Farida Haque  |  Rating: 7.5/10  |  Runtime: 119 min  |  Language: Bengali  |  Country: Bangladesh
+Cast: Anil Bhatt as Rahim, Meera Krishnan as Nusrat
+The Cartographer's Daughter (2016)
+Genres: Adventure, Fantasy  |  Director: Amara Solis  |  Rating: 7.9/10  |  Runtime: 134 min  |  Language: English  |  Country: UK
+Cast: Freya Lindqvist as Petra Falk, Idris Bankole as Tomas Renner, Wen Zhao as The Cartographer
+The Cellist of Varna (2013)
+Genres: Drama, Music  |  Director: Yordan Petrov  |  Rating: 7.6/10  |  Runtime: 114 min  |  Language: Bulgarian  |  Country: Bulgaria
+Cast: Nikolai Dimitrov as Andrei, Ralitsa Ivanova as Vesna
+The Cormorant's Watch (2010)
+Genres: Thriller, Mystery  |  Director: Rannveig Solberg  |  Rating: 7.0/10  |  Runtime: 103 min  |  Language: Norwegian  |  Country:
+Norway
+Cast: Bjorn Aas as Insp. Halvard, Kari Nystrom as Solveig
+The Fisherman's Almanac (2004)
+Genres: Drama  |  Director: Rannveig Solberg  |  Rating: 7.4/10  |  Runtime: 112 min  |  Language: Norwegian  |  Country: Norway
+Cast: Bjorn Aas as Halvard, Kari Nystrom as Solveig
+The Foghorn's Daughter (2002)
+Genres: Drama, Romance  |  Director: Ingrid Solheim  |  Rating: 7.6/10  |  Runtime: 117 min  |  Language: Norwegian  |  Country: Norway
+Cast: Sigrid Falk as Marit, Espen Rud as Captain Nils
+The Glassblower's Requiem (1998)
+Genres: Drama, Music  |  Director: Yordan Petrov  |  Rating: 7.7/10  |  Runtime: 116 min  |  Language: Bulgarian  |  Country: Bulgaria
+Cast: Nikolai Dimitrov as Andrei, Ralitsa Ivanova as Vesna
+The Grammarian's Curse (2010)
+Genres: Fantasy, Comedy  |  Director: Iulia Popescu  |  Rating: 7.5/10  |  Runtime: 102 min  |  Language: Romanian  |  Country: Romania
+Cast: Radu Constantin as Vasile, Ana Dumitrescu as Elena
+The Locksmith of Prague (2000)
+Genres: Drama, War  |  Director: Radek Hajek  |  Rating: 7.9/10  |  Runtime: 138 min  |  Language: Czech  |  Country: Czech Republic
+Cast: Pavel Marek as Anton Vesely, Zuzana Palkova as Ruzena
+The Locomotive Bride (1991)
+Genres: Romance, Drama  |  Director: Harold Fenwick  |  Rating: 7.6/10  |  Runtime: 122 min  |  Language: English  |  Country: UK
+Cast: Reginald Stowe as Albert, Edith Cromwell as Constance
+The Long Ferry (2011)
+Genres: Drama  |  Director: Cuong Le  |  Rating: 7.7/10  |  Runtime: 136 min  |  Language: Vietnamese  |  Country: Vietnam
+Cast: Minh Nguyen as Bao, Lien Pham as Suong
+The Longitude Problem (2015)
+Genres: Biography, Drama  |  Director: Edwin Marsh  |  Rating: 7.7/10  |  Runtime: 121 min  |  Language: English  |  Country: UK
+Cast: Oliver Penrose as John Harrow, Cecily Dunmore as Margaret Harrow, Bertram Wick as Lord Ashby
+The Marionette's Hour (1995)
+Genres: Horror, Fantasy  |  Director: Persephone Ashcombe  |  Rating: 6.9/10  |  Runtime: 99 min  |  Language: English  |  Country: UK
+Cast: August Sterling as Lord Blackthorn, Rosalind Ferris as Wren
+The Orchard Keepers (1993)
+Genres: Drama  |  Director: Halvor Bakke  |  Rating: 7.2/10  |  Runtime: 115 min  |  Language: Norwegian  |  Country: Norway
+Cast: Bjorn Aas as Old Halvor, Kari Nystrom as Astrid
+The Ossuary (2009)
+Genres: Horror, Thriller  |  Director: Vera Novak  |  Rating: 6.8/10  |  Runtime: 104 min  |  Language: Czech  |  Country: Czech Republic
+Cast: Milan Kovac as Father Anton, Ivana Sladek as Dr. Renata Voss
+The Pomegranate Accord (2021)
+Genres: Drama, History  |  Director: Bilal Karimov  |  Rating: 7.7/10  |  Runtime: 143 min  |  Language: Uzbek  |  Country: Uzbekistan
+Cast: Farrukh Tashkentov as Rustam, Zarina Yusupova as Gulnora
+The Quiet Machinist (1997)
+Genres: Drama  |  Director: Harold Fenwick  |  Rating: 7.4/10  |  Runtime: 120 min  |  Language: English  |  Country: UK
+Cast: Reginald Stowe as Walter Higgins, Edith Cromwell as Nora Higgins
+The Rice Paper Letters (2004)
+Genres: Drama, War  |  Director: Cuong Le  |  Rating: 7.9/10  |  Runtime: 141 min  |  Language: Vietnamese  |  Country: Vietnam
+Cast: Minh Nguyen as Trung, Lien Pham as Hoa
+The Riverbend Trial (2009)
+Genres: Drama, Crime  |  Director: Walton Iyer-Case  |  Rating: 7.8/10  |  Runtime: 144 min  |  Language: English  |  Country: USA
+Cast: Marcus Aldridge as Prosecutor Hale, Priya Kanth as Judge Renata Souza
+The Sandalwood Box (2021)
+Genres: Drama, Mystery  |  Director: Farida Haque  |  Rating: 7.7/10  |  Runtime: 113 min  |  Language: Bengali  |  Country: Bangladesh
+Cast: Anil Bhatt as Inspector Rahim, Meera Krishnan as Nusrat
+The Signal Room (1999)
+Genres: Sci-Fi, Thriller  |  Director: Lena Whitfield  |  Rating: 8.1/10  |  Runtime: 128 min  |  Language: English  |  Country: USA
+Cast: Marcus Aldridge as Dr. Owen Reyes, Priya Kanth as Commander Ilsa Voss, Tobias Meer as Station AI 'Halcyon'
+Synopsis: A deep-space listening post picks up a signal that seems to be replaying tomorrow's news.
+The Silk Road Ledger (2003)
+Genres: Adventure, History  |  Director: Bilal Karimov  |  Rating: 7.6/10  |  Runtime: 146 min  |  Language: Uzbek  |  Country: Uzbekistan
+Cast: Farrukh Tashkentov as Jahangir, Zarina Yusupova as Nilufar
+The Somnambulist's Wife (2008)
+Genres: Mystery, Romance  |  Director: Odile Fontaine  |  Rating: 7.4/10  |  Runtime: 112 min  |  Language: French  |  Country: France
+Cast: Etienne Rousseau as Dr. Marceau, Camille Aubert as Adele
+The Tinsmith's Apprentice (2001)
+Genres: Drama  |  Director: Georg Aldebrand  |  Rating: 7.3/10  |  Runtime: 105 min  |  Language: German  |  Country: Austria
+Cast: Klaus Neumann as Otto, Hedwig Sauer as Greta
+The Understudy's Gambit (2019)
+Genres: Drama, Thriller  |  Director: Fenella Whitcombe  |  Rating: 7.3/10  |  Runtime: 107 min  |  Language: English  |  Country: UK
+Cast: August Sterling as Colin Vane, Rosalind Ferris as Marguerite Loy
+The Watchmaker's Apprentice (2007)
+Genres: Drama, Mystery  |  Director: Odile Fontaine  |  Rating: 7.5/10  |  Runtime: 111 min  |  Language: French  |  Country: Switzerland
+Cast: Etienne Rousseau as Julien, Camille Aubert as Solange
+The Wax Museum Heist (2015)
+Genres: Comedy, Crime  |  Director: Cormac Boyle  |  Rating: 7.2/10  |  Runtime: 99 min  |  Language: English  |  Country: Ireland
+Cast: Fionn Casey as Liam, Saoirse Nolan as Grainne, Declan Rourke as Detective Fitz
+Threadbare (2018)
+Genres: Drama  |  Director: Naledi Mokoena  |  Rating: 8.1/10  |  Runtime: 100 min  |  Language: English  |  Country: South Africa
+Cast: Thabo Nkosi as Kagiso, Zanele Dube as Palesa
+Turnstile (2020)
+Genres: Comedy  |  Director: Guy Lassiter  |  Rating: 6.8/10  |  Runtime: 93 min  |  Language: English  |  Country: USA
+Cast: Nathan Pierce as Wes Calder, Simone Traylor as Beth
+Vanishing Point Cafe (2001)
+Genres: Comedy, Romance  |  Director: Guy Lassiter  |  Rating: 7.2/10  |  Runtime: 101 min  |  Language: English  |  Country: USA
+Cast: Nathan Pierce as Wes Calder, Julia Marchetti as Rosa Delgado, Simone Traylor as Beth
+Vermilion Tide (2022)
+Genres: Thriller, Romance  |  Director: Devika Sundaram  |  Rating: 7.6/10  |  Runtime: 127 min  |  Language: Tamil  |  Country: India
+Cast: Karthik Iyer as Suresh, Lakshmi Rao as Deepa
+Whistle Down the Canyon (1999)
+Genres: Western  |  Director: Dale Pruitt  |  Rating: 7.1/10  |  Runtime: 118 min  |  Language: English  |  Country: USA
+Cast: Cole Marrow as Marshal Bly, Silas Cade as Judge Toombs
+Wildfire Season (2022)
+Genres: Drama, Thriller  |  Director: Callum Reyes  |  Rating: 7.9/10  |  Runtime: 124 min  |  Language: English  |  Country: USA
+Cast: Dominic Ashworth as Ranger Cole, Ines Duarte as Ranger Vega
+Section 2 — People
+131 unique actors and directors appearing in the dataset above.
+NameBornRole(s)
+Aino Jarvinen1954Director
+Airi Matsuda1956Actor
+Amara Solis1941Director
+Ana Dumitrescu1956Actor
+Anil Bhatt1940Actor
+Anneliese Krause1977Director
+Aryan Malhotra1947Actor
+August Sterling1947Actor
+Beatriz Cordero1955Director
+Bertram Wick1978Actor
+Bianca Souza1976Director
+Bilal Karimov1992Director
+Bjorn Aas1989Actor
+Bo Zhang1988Actor
+Caetano Rocha1983Actor
+Callum Reyes1966Director
+Camila Vargas1958Actor
+Camille Aubert1954Actor
+Cassandra Yeo1965Director
+Cecily Dunmore1943Actor
+Chiara Rinaldi1949Actor
+Chidi Obinna1981Director
+Cole Marrow1986Actor
+Cormac Boyle1968Director
+Cuong Le1981Director
+Daichi Nomura1948Actor
+Dale Pruitt1965Director
+Declan Rourke1959Actor
+Delilah Frost1984Actor
+Devika Sundaram1991Director
+Diego Falcone1980Actor
+Dominic Ashworth1962Actor
+Edith Cromwell1943Actor
+Edwin Marsh1944Director
+NameBornRole(s)
+Elias Koskinen1984Actor
+Enzo Marchetti1978Actor
+Espen Rud1960Actor
+Etienne Rousseau1969Actor
+Farhan Qureshi1938Actor
+Farida Haque1996Director
+Farrukh Tashkentov1968Actor
+Femi Balogun1961Actor
+Fenella Whitcombe1952Director
+Fionn Casey1982Actor
+Franco Bianchi1982Director
+Freya Lindqvist1956Actor
+Georg Aldebrand1953Director
+Grant Okafor1964Actor
+Guy Lassiter1938Director
+Halvor Bakke1991Director
+Harold Fenwick1940Director
+Haruto Ishikawa1974Director
+Hedwig Sauer1970Actor
+Idris Bankole1962Actor
+Ines Duarte1951Actor
+Ingrid Solheim1959Director
+Isadora Melo1939Actor
+Ishani Rao1971Actor
+Iulia Popescu1994Director
+Ivana Sladek1990Actor
+Jiro Osako1974Actor
+Josie Tremblay1994Director
+Julia Marchetti1938Actor
+Kagiso Radebe1955Actor
+Kari Nystrom1997Actor
+Karthik Iyer1985Actor
+Kenta Aoyama1977Actor
+Klaus Neumann1942Actor
+Lakshmi Rao1954Actor
+Lena Whitfield1951Director
+NameBornRole(s)
+Lien Pham1962Actor
+Liv Moen1975Actor
+Marcus Aldridge1945Actor
+Marisol Trejo1972Director
+Marlene Vogt1993Actor
+Meera Krishnan1941Actor
+Mei Lin Tan1976Director
+Milan Kovac1987Actor
+Minh Nguyen1990Actor
+Naledi Mokoena1958Director
+Nathan Pierce1963Actor
+Ngozi Achebe1974Actor
+Nikolai Dimitrov1996Actor
+Odalys Marin1977Director
+Odile Fontaine1980Director
+Oliver Penrose1944Actor
+Otis Greer1989Actor
+Ottavia Serrano1943Director
+Paolo Conti1992Actor
+Pavel Marek1946Actor
+Persephone Ashcombe1997Director
+Petra Ullmann1952Director
+Priya Kanth1957Actor
+Priyanka Deshmukh1957Director
+Radek Hajek1960Director
+Radu Constantin1990Actor
+Rafael Ontiveros1955Actor
+Ralitsa Ivanova1951Actor
+Rannveig Solberg1986Director
+Reginald Stowe1976Actor
+Ren Kobayashi1962Actor
+Renata Pace1951Actor
+Rhea Kapadia1970Director
+Rosalind Ferris1995Actor
+Saana Virtanen1979Actor
+Sal Pomeroy1996Director
+NameBornRole(s)
+Sana Fujimori1962Actor
+Santiago Roldan1949Actor
+Saoirse Nolan1944Actor
+Sigrid Falk1992Actor
+Silas Cade1952Actor
+Simone Traylor1997Actor
+Tao Yuan1947Actor
+Thabo Nkosi1982Actor
+Tobias Meer1954Actor
+Tomas Rivera1956Actor
+Tunde Bakare1964Actor
+Valentina Cruz1959Actor
+Vera Novak1947Director
+Vincent Marucci1974Actor
+Walton Iyer-Case1997Director
+Wataru Endo1950Director
+Wen Zhao1971Actor
+Wolfgang Ritter1988Actor
+Wyatt Bracewell1941Director
+Xiu Chen1963Actor
+Yara Aznar1978Actor
+Yordan Petrov1990Director
+Zanele Dube1953Actor
+Zarina Yusupova1992Actor
+Zuzana Palkova1940Actor
+Section 3 — Relationships (ACTED_IN / DIRECTED)
+222 edges connecting people to movies.
+PersonRelationshipMovieRole
+Lena WhitfieldDIRECTEDThe Signal Room—
+Marcus AldridgeACTED_INThe Signal RoomDr. Owen Reyes
+Priya KanthACTED_INThe Signal RoomCommander Ilsa Voss
+Tobias MeerACTED_INThe Signal RoomStation AI 'Halcyon'
+Haruto IshikawaDIRECTEDPaper Lanterns—
+Ren KobayashiACTED_INPaper LanternsAiko
+Sana FujimoriACTED_INPaper LanternsMichiko
+Daichi NomuraACTED_INPaper LanternsKenji
+Callum ReyesDIRECTEDIron Harvest—
+Dominic AshworthACTED_INIron HarvestSgt. Ezra Colt
+Ines DuarteACTED_INIron HarvestLt. Marisol Vega
+Grant OkaforACTED_INIron HarvestCpl. Danny Ruiz
+Amara SolisDIRECTEDThe Cartographer's Daughter—
+Freya LindqvistACTED_INThe Cartographer's DaughterPetra Falk
+Idris BankoleACTED_INThe Cartographer's DaughterTomas Renner
+Wen ZhaoACTED_INThe Cartographer's DaughterThe Cartographer
+Priyanka DeshmukhDIRECTEDStatic Bloom—
+Anil BhattACTED_INStatic BloomDr. Rohan Sen
+Meera KrishnanACTED_INStatic BloomAsha Sen
+Farhan QureshiACTED_INStatic BloomVikram
+Franco BianchiDIRECTEDBlue Ledger—
+Enzo MarchettiACTED_INBlue LedgerSalvatore Greco
+Chiara RinaldiACTED_INBlue LedgerDetective Nora Bassi
+Paolo ContiACTED_INBlue LedgerTommaso Greco
+Marisol TrejoDIRECTEDNightshift at the Aquarium—
+Diego FalconeACTED_INNightshift at the AquariumCaretaker Mateo
+Yara AznarACTED_INNightshift at the AquariumBea Ontiveros
+Edwin MarshDIRECTEDThe Longitude Problem—
+Oliver PenroseACTED_INThe Longitude ProblemJohn Harrow
+Cecily DunmoreACTED_INThe Longitude ProblemMargaret Harrow
+Bertram WickACTED_INThe Longitude ProblemLord Ashby
+Naledi MokoenaDIRECTEDCopper Wire Choir—
+Thabo NkosiACTED_INCopper Wire ChoirSipho
+Zanele DubeACTED_INCopper Wire ChoirNomvula
+Kagiso RadebeACTED_INCopper Wire ChoirElder Mandla
+Guy LassiterDIRECTEDVanishing Point Cafe—
+PersonRelationshipMovieRole
+Nathan PierceACTED_INVanishing Point CafeWes Calder
+Julia MarchettiACTED_INVanishing Point CafeRosa Delgado
+Simone TraylorACTED_INVanishing Point CafeBeth
+Vera NovakDIRECTEDThe Ossuary—
+Milan KovacACTED_INThe OssuaryFather Anton
+Ivana SladekACTED_INThe OssuaryDr. Renata Voss
+Beatriz CorderoDIRECTEDSalt Flats Serenade—
+Rafael OntiverosACTED_INSalt Flats SerenadeEmiliano
+Camila VargasACTED_INSalt Flats SerenadeLuz
+Tomas RiveraACTED_INSalt Flats SerenadePadre Alvaro
+Wataru EndoDIRECTEDNine Rivers—
+Kenta AoyamaACTED_INNine RiversRyo
+Airi MatsudaACTED_INNine RiversSumire
+Jiro OsakoACTED_INNine RiversCaptain Fuji
+Fenella WhitcombeDIRECTEDThe Understudy's Gambit—
+August SterlingACTED_INThe Understudy's GambitColin Vane
+Rosalind FerrisACTED_INThe Understudy's GambitMarguerite Loy
+Wyatt BracewellDIRECTEDCopperhead County—
+Cole MarrowACTED_INCopperhead CountySheriff Ezra Bly
+Delilah FrostACTED_INCopperhead CountyAda Marrow
+Silas CadeACTED_INCopperhead CountyJudge Toombs
+Ingrid SolheimDIRECTEDThe Apiary—
+Sigrid FalkACTED_INThe ApiaryMother Hilde
+Espen RudACTED_INThe ApiaryFather Anders
+Liv MoenACTED_INThe ApiaryYoung Ronja
+Mei Lin TanDIRECTEDQuicksilver Market—
+Bo ZhangACTED_INQuicksilver MarketInspector Wei
+Xiu ChenACTED_INQuicksilver MarketLing
+Tao YuanACTED_INQuicksilver MarketBoss Han
+Odile FontaineDIRECTEDThe Somnambulist's Wife—
+Etienne RousseauACTED_INThe Somnambulist's WifeDr. Marceau
+Camille AubertACTED_INThe Somnambulist's WifeAdele
+Sal PomeroyDIRECTEDHarbor Lights, Chicago—
+Vincent MarucciACTED_INHarbor Lights, ChicagoDanny Voss
+Renata PaceACTED_INHarbor Lights, ChicagoCarla Bianchi
+Otis GreerACTED_INHarbor Lights, ChicagoDetective Hall
+Anneliese KrauseDIRECTEDThe Beekeeper's Ledger—
+Wolfgang RitterACTED_INThe Beekeeper's LedgerJosef Baum
+PersonRelationshipMovieRole
+Marlene VogtACTED_INThe Beekeeper's LedgerIlse Baum
+Chidi ObinnaDIRECTEDMarigold and Mortar—
+Tunde BakareACTED_INMarigold and MortarEmeka
+Ngozi AchebeACTED_INMarigold and MortarAdaeze
+Femi BalogunACTED_INMarigold and MortarBaba Sunday
+Rannveig SolbergDIRECTEDThe Cormorant's Watch—
+Bjorn AasACTED_INThe Cormorant's WatchInsp. Halvard
+Kari NystromACTED_INThe Cormorant's WatchSolveig
+Bianca SouzaDIRECTEDDust and Marigolds—
+Caetano RochaACTED_INDust and MarigoldsJoaquim
+Isadora MeloACTED_INDust and MarigoldsTerezinha
+Radek HajekDIRECTEDThe Locksmith of Prague—
+Pavel MarekACTED_INThe Locksmith of PragueAnton Vesely
+Zuzana PalkovaACTED_INThe Locksmith of PragueRuzena
+Devika SundaramDIRECTEDStatic on the Line—
+Karthik IyerACTED_INStatic on the LineInsp. Suresh
+Lakshmi RaoACTED_INStatic on the LineDeepa
+Yordan PetrovDIRECTEDThe Cellist of Varna—
+Nikolai DimitrovACTED_INThe Cellist of VarnaAndrei
+Ralitsa IvanovaACTED_INThe Cellist of VarnaVesna
+Odalys MarinDIRECTEDEmber and Ash—
+Santiago RoldanACTED_INEmber and AshAsh
+Valentina CruzACTED_INEmber and AshEmber
+Harold FenwickDIRECTEDThe Quiet Machinist—
+Reginald StoweACTED_INThe Quiet MachinistWalter Higgins
+Edith CromwellACTED_INThe Quiet MachinistNora Higgins
+Rhea KapadiaDIRECTEDMonsoon Ledger—
+Aryan MalhotraACTED_INMonsoon LedgerDev
+Ishani RaoACTED_INMonsoon LedgerMeher
+Cormac BoyleDIRECTEDThe Wax Museum Heist—
+Fionn CaseyACTED_INThe Wax Museum HeistLiam
+Saoirse NolanACTED_INThe Wax Museum HeistGrainne
+Declan RourkeACTED_INThe Wax Museum HeistDetective Fitz
+Aino JarvinenDIRECTEDNorthern Static—
+Elias KoskinenACTED_INNorthern StaticAleksi
+Saana VirtanenACTED_INNorthern StaticMarja
+Cuong LeDIRECTEDThe Rice Paper Letters—
+Minh NguyenACTED_INThe Rice Paper LettersTrung
+PersonRelationshipMovieRole
+Lien PhamACTED_INThe Rice Paper LettersHoa
+Cassandra YeoDIRECTEDPerihelion—
+Idris BankoleACTED_INPerihelionCmdr. Osei
+Freya LindqvistACTED_INPerihelionDr. Marlowe
+Wen ZhaoACTED_INPerihelionNavigator Su
+Georg AldebrandDIRECTEDThe Tinsmith's Apprentice—
+Klaus NeumannACTED_INThe Tinsmith's ApprenticeOtto
+Hedwig SauerACTED_INThe Tinsmith's ApprenticeGreta
+Josie TremblayDIRECTEDSalted Caramel—
+Etienne RousseauACTED_INSalted CaramelMarc
+Camille AubertACTED_INSalted CaramelNoelle
+Walton Iyer-CaseDIRECTEDThe Riverbend Trial—
+Marcus AldridgeACTED_INThe Riverbend TrialProsecutor Hale
+Priya KanthACTED_INThe Riverbend TrialJudge Renata Souza
+Persephone AshcombeDIRECTEDBlackthorn Manor—
+August SterlingACTED_INBlackthorn ManorLord Blackthorn
+Rosalind FerrisACTED_INBlackthorn ManorGoverness Wren
+Odalys MarinDIRECTEDThe Cane Cutter's Son—
+Santiago RoldanACTED_INThe Cane Cutter's SonIgnacio
+Valentina CruzACTED_INThe Cane Cutter's SonRosa
+Petra UllmannDIRECTEDA Diet of Worms—
+Wolfgang RitterACTED_INA Diet of WormsMartin
+Marlene VogtACTED_INA Diet of WormsKatharina
+Farida HaqueDIRECTEDThe Sandalwood Box—
+Anil BhattACTED_INThe Sandalwood BoxInspector Rahim
+Meera KrishnanACTED_INThe Sandalwood BoxNusrat
+Dale PruittDIRECTEDCopperfield Junction—
+Cole MarrowACTED_INCopperfield JunctionHank Dorsey
+Delilah FrostACTED_INCopperfield JunctionSarah Dorsey
+Iulia PopescuDIRECTEDThe Grammarian's Curse—
+Radu ConstantinACTED_INThe Grammarian's CurseVasile
+Ana DumitrescuACTED_INThe Grammarian's CurseElena
+Callum ReyesDIRECTEDWildfire Season—
+Dominic AshworthACTED_INWildfire SeasonRanger Cole
+Ines DuarteACTED_INWildfire SeasonRanger Vega
+Bilal KarimovDIRECTEDThe Silk Road Ledger—
+Farrukh TashkentovACTED_INThe Silk Road LedgerJahangir
+Zarina YusupovaACTED_INThe Silk Road LedgerNilufar
+PersonRelationshipMovieRole
+Naledi MokoenaDIRECTEDThreadbare—
+Thabo NkosiACTED_INThreadbareKagiso
+Zanele DubeACTED_INThreadbarePalesa
+Ottavia SerranoDIRECTEDThe Baroque Detective—
+Enzo MarchettiACTED_INThe Baroque DetectiveInsp. Fausto
+Chiara RinaldiACTED_INThe Baroque DetectiveContessa Bruni
+Lena WhitfieldDIRECTEDIceberg Protocol—
+Marcus AldridgeACTED_INIceberg ProtocolDr. Owen Reyes
+Tobias MeerACTED_INIceberg ProtocolHalcyon 2.0
+Halvor BakkeDIRECTEDThe Orchard Keepers—
+Bjorn AasACTED_INThe Orchard KeepersOld Halvor
+Kari NystromACTED_INThe Orchard KeepersAstrid
+Chidi ObinnaDIRECTEDMango Season—
+Tunde BakareACTED_INMango SeasonChuka
+Ngozi AchebeACTED_INMango SeasonBisi
+Harold FenwickDIRECTEDThe Locomotive Bride—
+Reginald StoweACTED_INThe Locomotive BrideAlbert
+Edith CromwellACTED_INThe Locomotive BrideConstance
+Mei Lin TanDIRECTEDMeridian Blue—
+Bo ZhangACTED_INMeridian BlueDr. Wei
+Xiu ChenACTED_INMeridian BlueDr. Ling Fu
+Odile FontaineDIRECTEDThe Watchmaker's Apprentice—
+Etienne RousseauACTED_INThe Watchmaker's ApprenticeJulien
+Camille AubertACTED_INThe Watchmaker's ApprenticeSolange
+Guy LassiterDIRECTEDTurnstile—
+Nathan PierceACTED_INTurnstileWes Calder
+Simone TraylorACTED_INTurnstileBeth
+Cuong LeDIRECTEDThe Long Ferry—
+Minh NguyenACTED_INThe Long FerryBao
+Lien PhamACTED_INThe Long FerrySuong
+Dale PruittDIRECTEDWhistle Down the Canyon—
+Cole MarrowACTED_INWhistle Down the CanyonMarshal Bly
+Silas CadeACTED_INWhistle Down the CanyonJudge Toombs
+Iulia PopescuDIRECTEDThe Amber Room Cipher—
+Radu ConstantinACTED_INThe Amber Room CipherAgent Vlad
+Ana DumitrescuACTED_INThe Amber Room CipherDr. Cioban
+Bianca SouzaDIRECTEDConfetti for Ghosts—
+Caetano RochaACTED_INConfetti for GhostsJoaquim
+PersonRelationshipMovieRole
+Isadora MeloACTED_INConfetti for GhostsTerezinha
+Ingrid SolheimDIRECTEDThe Foghorn's Daughter—
+Sigrid FalkACTED_INThe Foghorn's DaughterMarit
+Espen RudACTED_INThe Foghorn's DaughterCaptain Nils
+Fenella WhitcombeDIRECTEDSemaphore—
+August SterlingACTED_INSemaphoreLt. Vane
+Rosalind FerrisACTED_INSemaphoreNurse Loy
+Bilal KarimovDIRECTEDThe Pomegranate Accord—
+Farrukh TashkentovACTED_INThe Pomegranate AccordRustam
+Zarina YusupovaACTED_INThe Pomegranate AccordGulnora
+Wyatt BracewellDIRECTEDDoubling Back—
+Grant OkaforACTED_INDoubling BackDeputy Ruiz
+Delilah FrostACTED_INDoubling BackAda Marrow
+Farida HaqueDIRECTEDThe Cardamom Trade—
+Anil BhattACTED_INThe Cardamom TradeRahim
+Meera KrishnanACTED_INThe Cardamom TradeNusrat
+Aino JarvinenDIRECTEDStatic Horizon—
+Elias KoskinenACTED_INStatic HorizonAleksi
+Saana VirtanenACTED_INStatic HorizonMarja
+Persephone AshcombeDIRECTEDThe Marionette's Hour—
+August SterlingACTED_INThe Marionette's HourLord Blackthorn
+Rosalind FerrisACTED_INThe Marionette's HourWren
+Anneliese KrauseDIRECTEDCopper and Chalk—
+Wolfgang RitterACTED_INCopper and ChalkJosef
+Marlene VogtACTED_INCopper and ChalkIlse
+Rannveig SolbergDIRECTEDThe Fisherman's Almanac—
+Bjorn AasACTED_INThe Fisherman's AlmanacHalvard
+Kari NystromACTED_INThe Fisherman's AlmanacSolveig
+Devika SundaramDIRECTEDVermilion Tide—
+Karthik IyerACTED_INVermilion TideSuresh
+Lakshmi RaoACTED_INVermilion TideDeepa
+Yordan PetrovDIRECTEDThe Glassblower's Requiem—
+Nikolai DimitrovACTED_INThe Glassblower's RequiemAndrei
+Ralitsa IvanovaACTED_INThe Glassblower's RequiemVesna
+Section 4 — User Reviews (REVIEWED)
+193 synthetic user reviews, useful for sentiment / recommendation demos.
+ReviewerMovieStarsComment
+Reese PetitThe Signal Room7.9The score does a lot of heavy lifting here.
+Jamie HaddadThe Signal Room8.4Visually striking, if a little thin on plot.
+Reese NovakThe Signal Room8.2Underrated; deserved more attention on release.
+Blair FerreiraPaper Lanterns6.4Didn't fully land for me, but I see the appeal.
+Blair RubioPaper Lanterns6.5Rewatched it and caught details I missed the first time.
+Taylor HaddadIron Harvest6.8One of the better entries in its genre this decade.
+Sasha KowalskiIron Harvest5.6Didn't fully land for me, but I see the appeal.
+Dana NowakIron Harvest6.8Solid ensemble cast, uneven script.
+Drew HaasThe Cartographer's Daughter5.9The score does a lot of heavy lifting here.
+Skyler HaasThe Cartographer's Daughter6.1Underrated; deserved more attention on release.
+Blair IbarraStatic Bloom8.5Rewatched it and caught details I missed the first time.
+Casey PetitStatic Bloom8.5Didn't fully land for me, but I see the appeal.
+Peyton MenonBlue Ledger8.8One of the better entries in its genre this decade.
+Dana LarssonBlue Ledger6.1A slow burn that pays off in the final act.
+Elliot VossNightshift at the Aquarium5.1Solid ensemble cast, uneven script.
+Sam HaddadNightshift at the Aquarium5.8A slow burn that pays off in the final act.
+Rowan HaddadThe Longitude Problem7.3The score does a lot of heavy lifting here.
+Alex PetitThe Longitude Problem7.0Underrated; deserved more attention on release.
+Reese HaddadThe Longitude Problem6.8Didn't fully land for me, but I see the appeal.
+Alex HaddadCopper Wire Choir8.4Didn't fully land for me, but I see the appeal.
+Blair HaddadCopper Wire Choir8.0Solid ensemble cast, uneven script.
+Riley SilvaCopper Wire Choir6.6Visually striking, if a little thin on plot.
+Morgan VossVanishing Point Cafe5.6The score does a lot of heavy lifting here.
+Robin KowalskiVanishing Point Cafe7.5The score does a lot of heavy lifting here.
+Riley AbaraThe Ossuary5.4Strong lead performance, but the pacing sags in the middle.
+Dana BianchiThe Ossuary4.8A slow burn that pays off in the final act.
+Rowan PetitThe Ossuary5.9Rewatched it and caught details I missed the first time.
+Reese VossSalt Flats Serenade7.9Underrated; deserved more attention on release.
+Sam LarssonSalt Flats Serenade8.1Rewatched it and caught details I missed the first time.
+Reese IbarraSalt Flats Serenade6.2Great use of location and sound design.
+Quinn SilvaNine Rivers8.5Didn't fully land for me, but I see the appeal.
+Rowan PetitNine Rivers8.2Didn't fully land for me, but I see the appeal.
+Jamie DelgadoThe Understudy's Gambit6.2Strong lead performance, but the pacing sags in the middle.
+Peyton VossThe Understudy's Gambit8.2Visually striking, if a little thin on plot.
+Sam NovakThe Understudy's Gambit6.2Great use of location and sound design.
+Rowan FerreiraThe Understudy's Gambit6.9Visually striking, if a little thin on plot.
+ReviewerMovieStarsComment
+Quinn VossCopperhead County8.0A little overlong, but the central performance carries it.
+Morgan BianchiCopperhead County6.2Great use of location and sound design.
+Blair MenonCopperhead County7.1Ending felt rushed but the journey there was worth it.
+Reese KowalskiThe Apiary9.0Rewatched it and caught details I missed the first time.
+Jordan AbaraThe Apiary8.4The score does a lot of heavy lifting here.
+Morgan YousefQuicksilver Market7.6Didn't fully land for me, but I see the appeal.
+Jamie VossQuicksilver Market8.2Rewatched it and caught details I missed the first time.
+Reese ChenQuicksilver Market5.9Underrated; deserved more attention on release.
+Taylor ChenQuicksilver Market7.2Great use of location and sound design.
+Morgan NovakThe Somnambulist's Wife7.8Ending felt rushed but the journey there was worth it.
+Taylor YousefThe Somnambulist's Wife7.6Didn't fully land for me, but I see the appeal.
+Avery IbarraThe Somnambulist's Wife7.1Great use of location and sound design.
+Blair MenonThe Somnambulist's Wife7.7The score does a lot of heavy lifting here.
+Jordan SilvaHarbor Lights, Chicago8.2Strong lead performance, but the pacing sags in the middle.
+Sasha OkaforHarbor Lights, Chicago8.7Solid ensemble cast, uneven script.
+Quinn AbaraHarbor Lights, Chicago8.7Great use of location and sound design.
+Sasha RubioHarbor Lights, Chicago6.7Strong lead performance, but the pacing sags in the middle.
+Reese LarssonThe Beekeeper's Ledger6.3Rewatched it and caught details I missed the first time.
+Casey HaddadThe Beekeeper's Ledger8.2Didn't fully land for me, but I see the appeal.
+Reese VossThe Beekeeper's Ledger7.2Didn't fully land for me, but I see the appeal.
+Skyler YousefMarigold and Mortar6.3Ending felt rushed but the journey there was worth it.
+Sasha DelgadoMarigold and Mortar6.3Ending felt rushed but the journey there was worth it.
+Elliot LarssonThe Cormorant's Watch7.9Underrated; deserved more attention on release.
+Jamie IbarraThe Cormorant's Watch6.6Strong lead performance, but the pacing sags in the middle.
+Rowan FerreiraThe Cormorant's Watch5.2Great use of location and sound design.
+Jordan RubioThe Cormorant's Watch7.0Visually striking, if a little thin on plot.
+Jordan RubioDust and Marigolds7.0Visually striking, if a little thin on plot.
+Morgan HaddadDust and Marigolds7.8A slow burn that pays off in the final act.
+Reese OkaforDust and Marigolds6.1Underrated; deserved more attention on release.
+Jamie HaasDust and Marigolds8.3One of the better entries in its genre this decade.
+Alex VossThe Locksmith of Prague6.6The score does a lot of heavy lifting here.
+Riley FerreiraThe Locksmith of Prague6.4Visually striking, if a little thin on plot.
+Skyler NowakThe Locksmith of Prague7.6The score does a lot of heavy lifting here.
+Morgan AbaraStatic on the Line7.3Underrated; deserved more attention on release.
+Sam SilvaStatic on the Line7.5One of the better entries in its genre this decade.
+Casey HaasStatic on the Line5.6Underrated; deserved more attention on release.
+Reese LarssonStatic on the Line6.4Didn't fully land for me, but I see the appeal.
+Blair MenonThe Cellist of Varna7.9A little overlong, but the central performance carries it.
+ReviewerMovieStarsComment
+Morgan KowalskiThe Cellist of Varna7.9Rewatched it and caught details I missed the first time.
+Avery PetitEmber and Ash6.7Didn't fully land for me, but I see the appeal.
+Riley HaddadEmber and Ash7.3Underrated; deserved more attention on release.
+Jordan MarinoEmber and Ash6.9Great use of location and sound design.
+Riley MarinoEmber and Ash7.5Didn't fully land for me, but I see the appeal.
+Sam LarssonThe Quiet Machinist8.0One of the better entries in its genre this decade.
+Peyton AbaraThe Quiet Machinist6.2A little overlong, but the central performance carries it.
+Alex RubioThe Quiet Machinist6.6Visually striking, if a little thin on plot.
+Morgan HaddadThe Quiet Machinist8.2Visually striking, if a little thin on plot.
+Quinn BianchiMonsoon Ledger6.1Solid ensemble cast, uneven script.
+Sam OkaforMonsoon Ledger6.8A little overlong, but the central performance carries it.
+Rowan KowalskiMonsoon Ledger7.7A slow burn that pays off in the final act.
+Reese YousefMonsoon Ledger7.5Underrated; deserved more attention on release.
+Jordan BianchiThe Wax Museum Heist7.4Solid ensemble cast, uneven script.
+Dana MarinoThe Wax Museum Heist5.7Solid ensemble cast, uneven script.
+Taylor MarinoNorthern Static7.4One of the better entries in its genre this decade.
+Sasha SilvaNorthern Static6.8A little overlong, but the central performance carries it.
+Taylor HaddadThe Rice Paper Letters8.6One of the better entries in its genre this decade.
+Quinn OkaforThe Rice Paper Letters8.9Visually striking, if a little thin on plot.
+Sasha VossPerihelion6.8Great use of location and sound design.
+Alex NovakPerihelion7.6Ending felt rushed but the journey there was worth it.
+Morgan RubioThe Tinsmith's Apprentice6.0Solid ensemble cast, uneven script.
+Casey FerreiraThe Tinsmith's Apprentice8.1Strong lead performance, but the pacing sags in the middle.
+Dana LarssonSalted Caramel5.6A little overlong, but the central performance carries it.
+Elliot PetitSalted Caramel7.0Strong lead performance, but the pacing sags in the middle.
+Avery MenonSalted Caramel5.5One of the better entries in its genre this decade.
+Elliot MarinoThe Riverbend Trial6.3Great use of location and sound design.
+Drew LarssonThe Riverbend Trial7.8Great use of location and sound design.
+Robin NowakBlackthorn Manor5.8Underrated; deserved more attention on release.
+Jamie VossBlackthorn Manor6.3Underrated; deserved more attention on release.
+Sam MarinoBlackthorn Manor5.9A little overlong, but the central performance carries it.
+Rowan FerreiraBlackthorn Manor5.7Great use of location and sound design.
+Alex VossThe Cane Cutter's Son5.8The score does a lot of heavy lifting here.
+Alex BianchiThe Cane Cutter's Son6.2Great use of location and sound design.
+Jordan RubioA Diet of Worms7.0The score does a lot of heavy lifting here.
+Skyler SilvaA Diet of Worms5.9Solid ensemble cast, uneven script.
+Casey BianchiA Diet of Worms7.0The score does a lot of heavy lifting here.
+Alex ChenThe Sandalwood Box6.8One of the better entries in its genre this decade.
+ReviewerMovieStarsComment
+Blair NowakThe Sandalwood Box8.2Solid ensemble cast, uneven script.
+Jordan AbaraThe Sandalwood Box8.5Solid ensemble cast, uneven script.
+Robin HaddadCopperfield Junction7.3A slow burn that pays off in the final act.
+Jordan LarssonCopperfield Junction5.6Rewatched it and caught details I missed the first time.
+Drew NowakThe Grammarian's Curse7.4Solid ensemble cast, uneven script.
+Riley VossThe Grammarian's Curse5.7Didn't fully land for me, but I see the appeal.
+Skyler FerreiraThe Grammarian's Curse6.8Solid ensemble cast, uneven script.
+Robin YousefThe Grammarian's Curse6.5Rewatched it and caught details I missed the first time.
+Drew NovakWildfire Season6.6A slow burn that pays off in the final act.
+Jamie YousefWildfire Season6.9Strong lead performance, but the pacing sags in the middle.
+Quinn MenonThe Silk Road Ledger7.5The score does a lot of heavy lifting here.
+Peyton IbarraThe Silk Road Ledger7.2A little overlong, but the central performance carries it.
+Drew NowakThe Silk Road Ledger7.9Strong lead performance, but the pacing sags in the middle.
+Jordan BianchiThreadbare7.6Didn't fully land for me, but I see the appeal.
+Peyton VossThreadbare8.5Rewatched it and caught details I missed the first time.
+Dana MarinoThreadbare7.9Underrated; deserved more attention on release.
+Riley BianchiThreadbare7.3The score does a lot of heavy lifting here.
+Sasha YousefThe Baroque Detective6.7Ending felt rushed but the journey there was worth it.
+Rowan MenonThe Baroque Detective5.6A slow burn that pays off in the final act.
+Sasha NowakIceberg Protocol7.6Solid ensemble cast, uneven script.
+Taylor VossIceberg Protocol8.3Great use of location and sound design.
+Sasha ChenThe Orchard Keepers5.3Rewatched it and caught details I missed the first time.
+Taylor PetitThe Orchard Keepers7.2Strong lead performance, but the pacing sags in the middle.
+Jordan VossThe Orchard Keepers7.7Visually striking, if a little thin on plot.
+Morgan HaddadThe Orchard Keepers7.7Didn't fully land for me, but I see the appeal.
+Morgan VossMango Season5.7One of the better entries in its genre this decade.
+Avery DelgadoMango Season7.3Strong lead performance, but the pacing sags in the middle.
+Drew NovakMango Season6.3Didn't fully land for me, but I see the appeal.
+Drew SilvaThe Locomotive Bride5.7A little overlong, but the central performance carries it.
+Sam YousefThe Locomotive Bride7.0One of the better entries in its genre this decade.
+Blair FerreiraMeridian Blue6.5Underrated; deserved more attention on release.
+Quinn IbarraMeridian Blue6.6Visually striking, if a little thin on plot.
+Morgan IbarraMeridian Blue6.6The score does a lot of heavy lifting here.
+Dana HaddadThe Watchmaker's Apprentice7.9The score does a lot of heavy lifting here.
+Blair AbaraThe Watchmaker's Apprentice7.3Strong lead performance, but the pacing sags in the middle.
+Jamie HaasThe Watchmaker's Apprentice6.8One of the better entries in its genre this decade.
+Jordan KowalskiTurnstile7.0Didn't fully land for me, but I see the appeal.
+Reese RubioTurnstile7.2A slow burn that pays off in the final act.
+ReviewerMovieStarsComment
+Avery NowakTurnstile6.1Strong lead performance, but the pacing sags in the middle.
+Sam ChenTurnstile5.4Strong lead performance, but the pacing sags in the middle.
+Quinn PetitThe Long Ferry6.0Didn't fully land for me, but I see the appeal.
+Drew BianchiThe Long Ferry6.2Underrated; deserved more attention on release.
+Taylor NowakWhistle Down the Canyon6.9Rewatched it and caught details I missed the first time.
+Jordan PetitWhistle Down the Canyon6.0Rewatched it and caught details I missed the first time.
+Dana OkaforWhistle Down the Canyon6.4Visually striking, if a little thin on plot.
+Elliot HaasWhistle Down the Canyon6.9The score does a lot of heavy lifting here.
+Casey OkaforThe Amber Room Cipher8.0Didn't fully land for me, but I see the appeal.
+Robin MarinoThe Amber Room Cipher8.5Great use of location and sound design.
+Dana MenonThe Amber Room Cipher7.2Ending felt rushed but the journey there was worth it.
+Blair AbaraConfetti for Ghosts7.8Didn't fully land for me, but I see the appeal.
+Dana HaasConfetti for Ghosts7.0A slow burn that pays off in the final act.
+Sasha AbaraThe Foghorn's Daughter6.1Solid ensemble cast, uneven script.
+Alex NowakThe Foghorn's Daughter7.2Great use of location and sound design.
+Robin BianchiThe Foghorn's Daughter8.1One of the better entries in its genre this decade.
+Robin KowalskiThe Foghorn's Daughter7.7Didn't fully land for me, but I see the appeal.
+Robin BianchiSemaphore5.9Rewatched it and caught details I missed the first time.
+Avery PetitSemaphore7.7A slow burn that pays off in the final act.
+Sam FerreiraThe Pomegranate Accord6.9Underrated; deserved more attention on release.
+Robin DelgadoThe Pomegranate Accord6.8Great use of location and sound design.
+Drew SilvaDoubling Back7.8Rewatched it and caught details I missed the first time.
+Casey NowakDoubling Back5.8Strong lead performance, but the pacing sags in the middle.
+Jordan AbaraDoubling Back6.2A little overlong, but the central performance carries it.
+Sasha SilvaThe Cardamom Trade7.3Visually striking, if a little thin on plot.
+Drew VossThe Cardamom Trade8.2One of the better entries in its genre this decade.
+Casey BianchiStatic Horizon8.2Great use of location and sound design.
+Jordan HaasStatic Horizon6.8Visually striking, if a little thin on plot.
+Casey MarinoStatic Horizon6.5Underrated; deserved more attention on release.
+Casey YousefStatic Horizon6.2Didn't fully land for me, but I see the appeal.
+Sam AbaraThe Marionette's Hour5.0Ending felt rushed but the journey there was worth it.
+Jamie FerreiraThe Marionette's Hour6.9Ending felt rushed but the journey there was worth it.
+Quinn MarinoThe Marionette's Hour7.2A slow burn that pays off in the final act.
+Peyton NowakCopper and Chalk8.6Underrated; deserved more attention on release.
+Casey AbaraCopper and Chalk8.1Underrated; deserved more attention on release.
+Sam ChenThe Fisherman's Almanac7.9Didn't fully land for me, but I see the appeal.
+Jordan IbarraThe Fisherman's Almanac6.0Underrated; deserved more attention on release.
+Elliot ChenVermilion Tide6.2A slow burn that pays off in the final act.
+ReviewerMovieStarsComment
+Blair MarinoVermilion Tide6.1Great use of location and sound design.
+Avery LarssonVermilion Tide8.3Underrated; deserved more attention on release.
+Quinn MenonThe Glassblower's Requiem5.8Didn't fully land for me, but I see the appeal.
+Alex BianchiThe Glassblower's Requiem5.9A slow burn that pays off in the final act.
+Jamie RubioThe Glassblower's Requiem6.9Rewatched it and caught details I missed the first time.
