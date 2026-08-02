@@ -10,6 +10,9 @@ let loadPromise = null;
 let openrouter = null;
 
 function getOpenRouter() {
+  if (!process.env.OPENROUTER_API_KEY) {
+    throw new Error("OPENROUTER_API_KEY is not set. Add it in Vercel → Project Settings → Environment Variables.");
+  }
   if (!openrouter) {
     const siteUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
       ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
