@@ -3,9 +3,9 @@ import { askCineRAG } from "../api/chat";
 
 const suggestions = [
   "Recommend a sci-fi thriller",
-  "Who directed Inception?",
-  "Explain the plot of Interstellar",
-  "Best movies of 2023",
+  "Who directed The Signal Room?",
+  "Who starred in The Beekeeper's Ledger?",
+  "What is Iron Harvest about?",
 ];
 
 function cleanAnswer(text) {
