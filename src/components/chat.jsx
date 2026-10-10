@@ -88,7 +88,7 @@ export default function Chat() {
 
         {isTyping && (
           <div className="message bot typing-indicator">
-            Generating response-this may take a few seconds
+            Generating response - this may take a few seconds
             <span className="loading-dots">
               <span></span>
               <span></span>
