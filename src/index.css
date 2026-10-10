@@ -19,6 +19,8 @@
 html, body {
   width: 80%;
   min-height: 80vh;
+  margin: 0;
+  padding: 0;
   background-color: #050508;
   background-image: 
     radial-gradient(circle at 50% 50%, rgba(255, 77, 158, 0.12) 0%, transparent 60%),
@@ -32,8 +34,9 @@ html, body {
 #root {
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-end;
   min-height: 100vh;
+  width: 100%;
   background-color: #050508;
   padding: 10px; /* Reduced outer padding */
 }
