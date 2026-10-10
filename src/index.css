@@ -17,7 +17,7 @@
 }
 
 html, body {
-  width: 80%;
+  width: 100%;              /* was 80%, so "far right" now means the edge of the screen */
   min-height: 80vh;
   margin: 0;
   padding: 0;
@@ -33,12 +33,12 @@ html, body {
 
 #root {
   display: flex;
-  justify-content: center;
+  justify-content: flex-end; /* was center, so the chatbot moves to the right */
   align-items: flex-end;
   min-height: 100vh;
   width: 100%;
   background-color: #050508;
-  padding: 10px; /* Reduced outer padding */
+  padding: 10px;
 }
 
 /* ==========================================================================
