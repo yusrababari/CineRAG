@@ -45,10 +45,11 @@ html, body {
    Main Chat Container (EXPANDED)
    ========================================================================== */
 .chat-container {
-  width: 100%;
-  max-width: 98vw;    /* Takes up almost full viewport width */
-  height: 95vh;        /* Takes up 95% of viewport height */
-  max-height: 98vh;    /* Expanded upper ceiling */
+  width: calc(80vw - 20px);  /* same size as before: 80% of viewport minus #root's 10px padding on each side */
+  max-width: none;           /* the old 98vw cap is no longer needed */
+  flex-shrink: 0;            /* stops flexbox from squeezing it */
+  height: 95vh;
+  max-height: 98vh;
   background-color: #0a0a0f;
   border-radius: 12px;
   border: 1px solid rgba(255, 77, 158, 0.25);
