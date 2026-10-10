@@ -6,7 +6,8 @@ const suggestions = [
   "Who directed The Signal Room?",
   "Who starred in The Beekeeper's Ledger?",
   "What is Iron Harvest about?",
-  "Find movies released after 2020."
+  "Find movies released after 2020.",
+  "What is the average rating of horror movies?"
 ];
 
 function cleanAnswer(text) {
