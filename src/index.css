@@ -721,6 +721,84 @@ html, body {
 }
 
 /* ==========================================================================
+   Centred, full-screen layout (Claude-style)
+   Sidebar on the left edge; header, messages and input share one centred column.
+   Change --column-width to make the column wider or narrower.
+   ========================================================================== */
+:root { --column-width: 760px; }
+
+#root {
+  justify-content: center;
+  align-items: stretch;
+  padding: 0;
+}
+
+.app-shell {
+  width: 100%;
+  max-width: none;
+  height: 100vh;
+  max-height: none;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  background: var(--bg-messages);
+}
+
+.app-shell .chat-container {
+  background: var(--bg-messages);
+}
+
+/* One shared gutter keeps everything aligned to the centre column,
+   while the scrollbar stays at the far edge of the screen. */
+.app-shell .chat-header,
+.app-shell .chat-messages,
+.app-shell .suggestions-container,
+.app-shell .chat-input-area {
+  padding-left:  max(20px, calc((100% - var(--column-width)) / 2));
+  padding-right: max(20px, calc((100% - var(--column-width)) / 2));
+}
+
+/* Quieter header: no heavy bar, just a thin grey divider */
+.app-shell .chat-header {
+  background: transparent;
+  box-shadow: none;
+  border-bottom: 1px solid var(--border-grey);
+}
+
+/* Suggestions sit directly above the input, no divider line */
+.app-shell .suggestions-container {
+  background: transparent;
+  border-top: none;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+/* Input becomes a rounded bar floating in the centre column */
+.app-shell .chat-input-area {
+  background: transparent;
+  border-top: none;
+  padding-top: 8px;
+  padding-bottom: 24px;
+}
+
+.app-shell .chat-input-area input,
+.app-shell .chat-input-area textarea {
+  padding: 16px 20px;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+}
+
+.app-shell .message-row { max-width: 100%; }
+
+/* Scroll-to-bottom button centres over the column */
+.app-shell .scroll-bottom {
+  left: 50%;
+  right: auto;
+  bottom: 130px;
+  margin-left: -20px;
+}
+
+/* ==========================================================================
    Responsive
    ========================================================================== */
 @media (max-width: 900px) {
