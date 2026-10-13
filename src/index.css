@@ -27,7 +27,7 @@ html, body {
     linear-gradient(to bottom, rgba(255, 77, 158, 0.03) 1px, transparent 1px);
   background-size: 100% 100%, 100% 24px;
   color: #ffd1e8;
-  font-family: 'Fira Code', monospace;
+   font-family: 'Orbitron', sans-serif;
   overflow-x: hidden;
 }
 
@@ -86,7 +86,7 @@ html, body {
 }
 
 .chat-header p {
-  font-family: 'Fira Code', monospace;
+   font-family: 'Orbitron', sans-serif;
   font-size: 13px;
   color: #94a3b8;
 }
