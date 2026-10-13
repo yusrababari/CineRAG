@@ -32,6 +32,10 @@
   --border-grey:    #2c2c34;   /* neutral grey dividers */
   --shadow:         0 10px 40px rgba(0, 0, 0, 0.6), 0 0 30px rgba(255, 77, 158, 0.10);
 
+  --accent-2:       #a78bfa;   /* violet */
+  --accent-3:       #22d3ee;   /* cyan   */
+  --accent-4:       #fbbf24;   /* amber  */
+
   --ok:             #3ddc97;
   --code-bg:        #000000;
   --code-text:      #ffd1e8;
@@ -799,6 +803,334 @@ html, body {
 }
 
 /* ==========================================================================
+   Colour accents  (pink + violet + cyan + amber on the black base)
+   Delete this section to go back to the pink-only look.
+   ========================================================================== */
+
+/* Soft multicolour glow behind the chat */
+.app-shell .chat-container {
+  background:
+    radial-gradient(ellipse at 12% 0%,   rgba(167, 139, 250, 0.16) 0%, transparent 45%),
+    radial-gradient(ellipse at 88% 100%, rgba(34, 211, 238, 0.10) 0%, transparent 45%),
+    radial-gradient(ellipse at 60% 30%,  rgba(255, 77, 158, 0.07) 0%, transparent 55%),
+    var(--bg-messages);
+}
+
+.app-shell .chat-messages { background-color: transparent; }
+
+/* Gradient title */
+.chat-header h2 {
+  background: linear-gradient(90deg, var(--accent), var(--accent-2) 55%, var(--accent-3));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* Bubbles */
+.message.user {
+  background: linear-gradient(135deg, #ff4d9e 0%, #8b5cf6 100%);
+  box-shadow: 0 4px 16px rgba(139, 92, 246, 0.30);
+}
+
+.message.bot {
+  border-left: 3px solid var(--accent-2);
+}
+
+/* Avatars */
+.avatar {
+  background: color-mix(in srgb, var(--accent-2) 22%, transparent);
+  border-color: color-mix(in srgb, var(--accent-2) 55%, transparent);
+}
+
+.message-row.user .avatar {
+  background: linear-gradient(135deg, #ff4d9e, #8b5cf6);
+}
+
+/* Code blocks pick up a cyan edge */
+.message pre { border-left: 3px solid var(--accent-3); }
+.message code { background: color-mix(in srgb, var(--accent-3) 16%, transparent); }
+.message pre code { background: none; }
+
+/* Send button */
+.chat-input-area button {
+  background: linear-gradient(135deg, #ff4d9e, #8b5cf6);
+  box-shadow: 0 4px 16px rgba(139, 92, 246, 0.40);
+}
+
+.chat-input-area button:hover {
+  box-shadow: 0 6px 22px rgba(255, 77, 158, 0.50);
+}
+
+/* Input focus ring in violet */
+.chat-input-area input:focus,
+.chat-input-area textarea:focus {
+  border-color: var(--accent-2);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent-2) 22%, transparent);
+}
+
+/* Typing dots cycle through the palette */
+.loading-dots span:nth-child(1) { background-color: var(--accent); }
+.loading-dots span:nth-child(2) { background-color: var(--accent-2); }
+.loading-dots span:nth-child(3) { background-color: var(--accent-3); }
+
+/* Sidebar: each prompt gets its own colour */
+.sidebar-list li:nth-child(4n+1) { --c: var(--accent); }
+.sidebar-list li:nth-child(4n+2) { --c: var(--accent-2); }
+.sidebar-list li:nth-child(4n+3) { --c: var(--accent-3); }
+.sidebar-list li:nth-child(4n+4) { --c: var(--accent-4); }
+
+.sidebar-list .sidebar-icon {
+  background: color-mix(in srgb, var(--c, var(--accent)) 18%, transparent);
+  border-color: color-mix(in srgb, var(--c, var(--accent)) 50%, transparent);
+}
+
+.sidebar-list .sidebar-link:hover {
+  background: color-mix(in srgb, var(--c, var(--accent)) 12%, transparent);
+  border-color: color-mix(in srgb, var(--c, var(--accent)) 55%, transparent);
+  color: var(--text);
+}
+
+.sidebar-list .sidebar-link:hover::after { color: var(--c, var(--accent)); }
+.sidebar-list .sidebar-link:hover .sidebar-icon { border-color: var(--c, var(--accent)); }
+
+/* A coloured stripe along the sidebar edge */
+.sidebar {
+  border-right: 1px solid var(--border-grey);
+  background:
+    linear-gradient(180deg, rgba(167, 139, 250, 0.10), transparent 35%),
+    var(--bg-sidebar);
+}
+
+/* Suggestion chips: cycle colours */
+.suggestions-container .suggestion-chip:nth-child(4n+1) { --chip: var(--accent); }
+.suggestions-container .suggestion-chip:nth-child(4n+2) { --chip: var(--accent-2); }
+.suggestions-container .suggestion-chip:nth-child(4n+3) { --chip: var(--accent-3); }
+.suggestions-container .suggestion-chip:nth-child(4n+4) { --chip: var(--accent-4); }
+
+.suggestions-container .suggestion-chip {
+  color: var(--chip, var(--accent-strong));
+  background: color-mix(in srgb, var(--chip, var(--accent)) 12%, transparent);
+  border-color: color-mix(in srgb, var(--chip, var(--accent)) 45%, transparent);
+}
+
+.suggestions-container .suggestion-chip:hover {
+  color: var(--text);
+  background: color-mix(in srgb, var(--chip, var(--accent)) 28%, transparent);
+  border-color: var(--chip, var(--accent));
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--chip, var(--accent)) 35%, transparent);
+}
+
+/* Header toolbar buttons */
+.icon-btn:hover {
+  color: var(--accent-3);
+  border-color: var(--accent-3);
+}
+
+/* ==========================================================================
+   Live animations
+   All motion is switched off for people who prefer reduced motion (see the end
+   of this file). Delete this section to remove every animation added here.
+   ========================================================================== */
+
+/* 1. Drifting colour blobs behind the chat */
+.app-shell .chat-container::before {
+  content: '';
+  position: absolute;
+  inset: -25%;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 25% 30%, rgba(167, 139, 250, 0.20) 0%, transparent 32%),
+    radial-gradient(circle at 75% 70%, rgba(34, 211, 238, 0.14) 0%, transparent 30%),
+    radial-gradient(circle at 60% 20%, rgba(255, 77, 158, 0.14) 0%, transparent 28%);
+  animation: driftGlow 22s ease-in-out infinite alternate;
+}
+
+/* :where() keeps this at zero specificity so absolute-positioned children
+   (scroll button, toast) keep their own positioning */
+:where(.app-shell .chat-container) > * { position: relative; z-index: 1; }
+
+@keyframes driftGlow {
+  0%   { transform: translate(-4%, -3%) rotate(0deg) scale(1); }
+  50%  { transform: translate(5%, 4%)   rotate(8deg) scale(1.08); }
+  100% { transform: translate(-2%, 6%)  rotate(-6deg) scale(1); }
+}
+
+/* 2. Flowing gradient title */
+.chat-header h2 {
+  background-size: 250% 100%;
+  animation: titleFlow 6s linear infinite;
+}
+
+@keyframes titleFlow {
+  to { background-position: -250% 0; }
+}
+
+/* 3. Live status dot with a ping ring */
+.status-dot { position: relative; }
+
+.status-dot::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  color: var(--ok);
+  animation: ping 2s ease-out infinite;
+}
+
+.status-dot.busy::after { color: var(--accent); animation-duration: 0.9s; }
+
+@keyframes ping {
+  0%   { transform: scale(1);   opacity: 0.8; }
+  100% { transform: scale(2.8); opacity: 0; }
+}
+
+/* 4. Messages slide in from their own side */
+.message-row.bot  { animation: slideFromLeft  0.35s cubic-bezier(.2, .8, .2, 1); }
+.message-row.user { animation: slideFromRight 0.35s cubic-bezier(.2, .8, .2, 1); }
+
+@keyframes slideFromLeft {
+  from { opacity: 0; transform: translateX(-18px) scale(0.97); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes slideFromRight {
+  from { opacity: 0; transform: translateX(18px) scale(0.97); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* 5. Your bubbles shimmer slowly */
+.message.user {
+  background-size: 200% 200%;
+  animation: bubbleShift 8s ease-in-out infinite;
+}
+
+@keyframes bubbleShift {
+  0%, 100% { background-position: 0% 50%; }
+  50%      { background-position: 100% 50%; }
+}
+
+/* 6. Bot avatar breathes */
+.message-row.bot .avatar { animation: avatarGlow 3s ease-in-out infinite; }
+
+@keyframes avatarGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(167, 139, 250, 0.45); }
+  50%      { box-shadow: 0 0 0 7px rgba(167, 139, 250, 0); }
+}
+
+/* 7. Streaming caret: <span class="stream-cursor"></span> at the end of a reply
+      while it is still being written */
+.stream-cursor {
+  display: inline-block;
+  width: 8px;
+  height: 1.1em;
+  margin-left: 3px;
+  vertical-align: text-bottom;
+  background: var(--accent-3);
+  border-radius: 2px;
+  animation: blink 1s steps(2, start) infinite;
+}
+
+@keyframes blink { to { visibility: hidden; } }
+
+/* 8. Typing dots: wave */
+.loading-dots span { animation-duration: 1.2s; }
+
+/* 9. Sidebar entrance (staggered) and hover wiggle */
+.sidebar-list li {
+  animation: sidebarIn 0.5s cubic-bezier(.2, .8, .2, 1) backwards;
+}
+
+.sidebar-list li:nth-child(1) { animation-delay: 0.05s; }
+.sidebar-list li:nth-child(2) { animation-delay: 0.12s; }
+.sidebar-list li:nth-child(3) { animation-delay: 0.19s; }
+.sidebar-list li:nth-child(4) { animation-delay: 0.26s; }
+.sidebar-list li:nth-child(5) { animation-delay: 0.33s; }
+.sidebar-list li:nth-child(6) { animation-delay: 0.40s; }
+.sidebar-list li:nth-child(n+7) { animation-delay: 0.47s; }
+
+@keyframes sidebarIn {
+  from { opacity: 0; transform: translateX(-16px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.sidebar-link:hover .sidebar-icon { animation: wiggle 0.5s ease; }
+
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0); }
+  25%      { transform: rotate(-12deg) scale(1.1); }
+  75%      { transform: rotate(10deg) scale(1.1); }
+}
+
+/* 10. Suggestion chips pop in, one after another */
+.suggestions-container .suggestion-chip {
+  animation: chipPop 0.4s cubic-bezier(.3, 1.4, .5, 1) backwards;
+}
+
+.suggestions-container .suggestion-chip:nth-child(2) { animation-delay: 0.08s; }
+.suggestions-container .suggestion-chip:nth-child(3) { animation-delay: 0.16s; }
+.suggestions-container .suggestion-chip:nth-child(4) { animation-delay: 0.24s; }
+.suggestions-container .suggestion-chip:nth-child(n+5) { animation-delay: 0.32s; }
+
+@keyframes chipPop {
+  from { opacity: 0; transform: scale(0.8) translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* 11. Send button: light sweep every few seconds */
+.chat-input-area button {
+  position: relative;
+  overflow: hidden;
+}
+
+.chat-input-area button::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -60%;
+  width: 40%;
+  height: 100%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.45), transparent);
+  transform: skewX(-20deg);
+  animation: sweep 4s ease-in-out infinite;
+}
+
+.chat-input-area button:disabled::after { animation: none; }
+
+@keyframes sweep {
+  0%, 60% { left: -60%; }
+  100%    { left: 130%; }
+}
+
+/* 12. Input glows while focused */
+.chat-input-area input:focus,
+.chat-input-area textarea:focus {
+  animation: focusPulse 2.4s ease-in-out infinite;
+}
+
+@keyframes focusPulse {
+  0%, 100% { box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent-2) 22%, transparent); }
+  50%      { box-shadow: 0 0 0 7px color-mix(in srgb, var(--accent) 16%, transparent); }
+}
+
+/* 13. Empty state floats; scroll button bobs */
+.empty-state { animation: floatY 5s ease-in-out infinite; }
+
+@keyframes floatY {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
+}
+
+.scroll-bottom.visible { animation: bob 1.6s ease-in-out infinite; }
+
+@keyframes bob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(4px); }
+}
+
+/* ==========================================================================
    Responsive
    ========================================================================== */
 @media (max-width: 900px) {
@@ -834,7 +1166,7 @@ html, body {
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
-    animation-duration: 0.01ms !important;
+    animation: none !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
