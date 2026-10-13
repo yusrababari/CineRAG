@@ -179,7 +179,7 @@ html, body {
   border: 1px solid rgba(255, 77, 158, 0.4);
   border-radius: 16px;
   padding: 6px 14px;
-  font-family: 'Fira Code', monospace;
+  font-family: 'Orbitron', sans-serif;
   font-size: 12px;
   cursor: pointer;
   transition: all 0.2s ease-in-out;
