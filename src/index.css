@@ -273,7 +273,7 @@ html, body {
 .chat-input-area input {
   flex: 1;
   padding: 12px 16px;
-  font-family: 'Fira Code', monospace;
+  font-family: 'Orbitron', sans-serif;
   font-size: 0.95rem;
   color: #ff4d9e;
   background: #050508;
