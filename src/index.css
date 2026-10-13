@@ -266,7 +266,7 @@ html, body {
   align-items: center;
   gap: 12px;
   padding: 16px 20px;
-  background: #0d0b18;
+  background: #b38caa;
   border-top: 2px solid #ff4d9e;
 }
 
@@ -276,7 +276,7 @@ html, body {
   font-family: 'Orbitron', sans-serif;
   font-size: 0.95rem;
   color: #ff4d9e;
-  background: #050508;
+  background: #c794b3;
   border: 1px solid rgba(255, 77, 158, 0.3);
   border-radius: 4px;
   outline: none;
@@ -305,7 +305,7 @@ html, body {
   font-weight: 600;
   font-size: 0.85rem;
   letter-spacing: 1px;
-  color: #050508;
+  color: #cc98c9;
   background: #ff4d9e;
   border: none;
   border-radius: 4px;
