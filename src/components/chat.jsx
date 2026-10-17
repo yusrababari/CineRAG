@@ -50,6 +50,7 @@ export default function Chat() {
   const [toast, setToast] = useState("");
   const messagesEndRef = useRef(null);
   const toastTimer = useRef(null);
+  const requestId = useRef(0); // bumped by Home so late replies are ignored
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -92,13 +93,17 @@ export default function Chat() {
     setInput("");
     setIsTyping(true);
 
+    const myRequest = requestId.current;
+
     try {
       const reply = await askCineRAG(text);
+      if (requestId.current !== myRequest) return; // user went Home meanwhile
       setMessages((prev) => [
         ...prev,
         { id: Date.now() + 1, sender: "bot", text: cleanAnswer(reply), time: timeNow() },
       ]);
     } catch {
+      if (requestId.current !== myRequest) return;
       setMessages((prev) => [
         ...prev,
         {
@@ -109,8 +114,16 @@ export default function Chat() {
         },
       ]);
     } finally {
-      setIsTyping(false);
+      if (requestId.current === myRequest) setIsTyping(false);
     }
+  }
+
+  // Back to the start page: empty chat, original suggestions
+  function goHome() {
+    requestId.current += 1;
+    setMessages([]);
+    setInput("");
+    setIsTyping(false);
   }
 
   function handleSend(e) {
@@ -152,6 +165,17 @@ export default function Chat() {
 
       <div className="chat-container">
         <div className="chat-header">
+          <button
+            type="button"
+            className="icon-btn"
+            onClick={goHome}
+            disabled={messages.length === 0 && !isTyping}
+            aria-label="Home"
+            title="Back to start"
+          >
+            🏠
+          </button>
+
           <div className="chat-header-text">
             <h2>🎬 CineRAG</h2>
             <p>
@@ -169,16 +193,6 @@ export default function Chat() {
               title="Toggle theme"
             >
               {theme === "dark" ? "☀️" : "🌙"}
-            </button>
-            <button
-              type="button"
-              className="icon-btn"
-              onClick={() => setMessages([])}
-              disabled={messages.length === 0}
-              aria-label="Clear chat"
-              title="Clear chat"
-            >
-              🗑
             </button>
           </div>
         </div>
@@ -244,7 +258,7 @@ export default function Chat() {
         <form className="chat-input-area" onSubmit={handleSend}>
           <input
             type="text"
-            placeholder="Type your movie question..."
+            placeholder="> type your movie question..."
             value={input}
             onChange={(e) => setInput(e.target.value)}
             aria-label="Your movie question"
