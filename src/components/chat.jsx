@@ -30,20 +30,65 @@ function cleanAnswer(text) {
     .trim();
 }
 
+function timeNow() {
+  return new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+}
+
+function getInitialTheme() {
+  try {
+    return localStorage.getItem("cinerag-theme") || "dark";
+  } catch {
+    return "dark";
+  }
+}
+
 export default function Chat() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [theme, setTheme] = useState(getInitialTheme);
+  const [toast, setToast] = useState("");
   const messagesEndRef = useRef(null);
+  const toastTimer = useRef(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isTyping]);
 
-  async function sendMessage(text) {
-    if (!text.trim()) return;
+  // Apply + remember the theme (the CSS reads [data-theme="light"] on <html>)
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    try {
+      localStorage.setItem("cinerag-theme", theme);
+    } catch {
+      /* storage can be blocked; ignore */
+    }
+  }, [theme]);
 
-    setMessages((prev) => [...prev, { id: Date.now(), sender: "user", text }]);
+  useEffect(() => () => clearTimeout(toastTimer.current), []);
+
+  function showToast(message) {
+    setToast(message);
+    clearTimeout(toastTimer.current);
+    toastTimer.current = setTimeout(() => setToast(""), 1600);
+  }
+
+  async function copyText(text) {
+    try {
+      await navigator.clipboard.writeText(text);
+      showToast("Copied!");
+    } catch {
+      showToast("Couldn't copy");
+    }
+  }
+
+  async function sendMessage(text) {
+    if (!text.trim() || isTyping) return;
+
+    setMessages((prev) => [
+      ...prev,
+      { id: Date.now(), sender: "user", text, time: timeNow() },
+    ]);
     setInput("");
     setIsTyping(true);
 
@@ -51,7 +96,7 @@ export default function Chat() {
       const reply = await askCineRAG(text);
       setMessages((prev) => [
         ...prev,
-        { id: Date.now() + 1, sender: "bot", text: cleanAnswer(reply) },
+        { id: Date.now() + 1, sender: "bot", text: cleanAnswer(reply), time: timeNow() },
       ]);
     } catch {
       setMessages((prev) => [
@@ -60,6 +105,7 @@ export default function Chat() {
           id: Date.now() + 1,
           sender: "bot",
           text: "⚠️ Oops, I couldn't reach the server. Please try again!",
+          time: timeNow(),
         },
       ]);
     } finally {
@@ -72,57 +118,144 @@ export default function Chat() {
     sendMessage(input);
   }
 
+  // Sidebar history = the questions asked this session, newest first
+  const history = messages.filter((m) => m.sender === "user").slice().reverse();
+
   return (
-    <div className="chat-container">
-      <div className="chat-header">
-        <h2>🎬 CineRAG</h2>
-        <p>🔍 Ask CineRAG about a movie, actor, or plot...</p>
-      </div>
+    <div className="app-shell">
+      <aside className={`sidebar${history.length === 0 ? " is-empty" : ""}`}>
+        <p className="sidebar-title">History</p>
 
-      <div className="chat-messages">
-        {messages.map((msg) => (
-          <div key={msg.id} className={`message ${msg.sender}`}>
-            <p>{msg.text}</p>
+        {history.length === 0 ? (
+          <p className="sidebar-empty">Your questions will show up here.</p>
+        ) : (
+          <ul className="sidebar-list">
+            {history.map((m) => (
+              <li key={m.id}>
+                <button
+                  type="button"
+                  className="sidebar-link"
+                  onClick={() => sendMessage(m.text)}
+                  disabled={isTyping}
+                  title="Ask again"
+                >
+                  <span className="sidebar-icon">💬</span>
+                  <span className="sidebar-label">{m.text}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        <div className="sidebar-footer">Answers come from the CineRAG movie database.</div>
+      </aside>
+
+      <div className="chat-container">
+        <div className="chat-header">
+          <div className="chat-header-text">
+            <h2>🎬 CineRAG</h2>
+            <p>
+              <span className={`status-dot${isTyping ? " busy" : ""}`} />
+              {isTyping ? "Thinking..." : "Ask about a movie, actor, or plot"}
+            </p>
           </div>
-        ))}
 
-        {isTyping && (
-          <div className="message bot typing-indicator">
-            Generating response - this may take a few seconds
-            <span className="loading-dots">
-              <span></span>
-              <span></span>
-              <span></span>
-            </span>
+          <div className="header-actions">
+            <button
+              type="button"
+              className="icon-btn"
+              onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
+              aria-label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
+              title="Toggle theme"
+            >
+              {theme === "dark" ? "☀️" : "🌙"}
+            </button>
+            <button
+              type="button"
+              className="icon-btn"
+              onClick={() => setMessages([])}
+              disabled={messages.length === 0}
+              aria-label="Clear chat"
+              title="Clear chat"
+            >
+              🗑
+            </button>
+          </div>
+        </div>
+
+        <div className="chat-messages" role="log" aria-live="polite">
+          {messages.length === 0 && !isTyping && (
+            <div className="empty-state">
+              <h3>What do you want to watch?</h3>
+              <p>Ask about a movie, actor, or plot, or try one of the ideas below.</p>
+            </div>
+          )}
+
+          {messages.map((msg) => (
+            <div key={msg.id} className={`message-row ${msg.sender}`}>
+              <div className="avatar" aria-hidden="true">
+                {msg.sender === "bot" ? "🎬" : "🙂"}
+              </div>
+              <div className={`message ${msg.sender}`}>
+                <p>{msg.text}</p>
+                <span className="timestamp">{msg.time}</span>
+                {msg.sender === "bot" && (
+                  <div className="message-actions">
+                    <button type="button" onClick={() => copyText(msg.text)}>
+                      Copy
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+
+          {isTyping && (
+            <div className="message-row bot">
+              <div className="avatar" aria-hidden="true">🎬</div>
+              <div className="message bot typing-indicator">
+                Generating response - this may take a few seconds
+                <span className="loading-dots">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </span>
+              </div>
+            </div>
+          )}
+          <div ref={messagesEndRef} />
+        </div>
+
+        {messages.length === 0 && (
+          <div className="suggestions-container">
+            {suggestions.map((suggestion) => (
+              <button
+                key={suggestion}
+                type="button"
+                className="suggestion-chip"
+                onClick={() => sendMessage(suggestion)}
+              >
+                {suggestion}
+              </button>
+            ))}
           </div>
         )}
-        <div ref={messagesEndRef} />
-      </div>
 
-      <div className="suggestions-container">
-        {suggestions.map((suggestion, index) => (
-          <button
-            key={index}
-            type="button"
-            className="suggestion-chip"
-            onClick={() => sendMessage(suggestion)}
-          >
-            {suggestion}
+        <form className="chat-input-area" onSubmit={handleSend}>
+          <input
+            type="text"
+            placeholder="Type your movie question..."
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            aria-label="Your movie question"
+          />
+          <button type="submit" disabled={isTyping || !input.trim()}>
+            Send
           </button>
-        ))}
-      </div>
+        </form>
 
-      <form className="chat-input-area" onSubmit={handleSend}>
-        <input
-          type="text"
-          placeholder="Type your movie question..."
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-        />
-        <button type="submit" disabled={isTyping}>
-          Send
-        </button>
-      </form>
+        {toast && <div className="toast">{toast}</div>}
+      </div>
     </div>
   );
 }
