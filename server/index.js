@@ -1,9 +1,12 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
 import { runRAG } from "../api/rag.js";
 
-dotenv.config();
+const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+dotenv.config({ path: path.join(projectRoot, ".env") });
 console.log("Loaded key:", process.env.OPENROUTER_API_KEY ? "✅ Found" : "❌ Missing");
 
 const app = express();

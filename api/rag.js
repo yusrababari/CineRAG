@@ -158,7 +158,17 @@ async function queryGraph(statement, parameters = {}) {
     body: JSON.stringify({ statement, parameters }),
   });
 
-  const result = await response.json();
+  const responseText = await response.text();
+  let result;
+  try {
+    result = responseText ? JSON.parse(responseText) : {};
+  } catch {
+    if (!response.ok) {
+      throw new Error(`Neo4j request failed (${response.status}) with a non-JSON response.`);
+    }
+    throw new Error("Neo4j returned an invalid JSON response.");
+  }
+
   if (!response.ok) {
     throw new Error(`Neo4j request failed (${response.status}): ${JSON.stringify(result.errors || result)}`);
   }

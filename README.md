@@ -29,7 +29,7 @@ React and Vite provide the chat UI; Node.js runs the retrieval backend; OpenRout
 1. Install the frontend/backend shared dependencies with `npm install`.
 2. Install the local Express server dependencies with `npm --prefix server install`.
 3. Create a Neo4j Aura instance and note its connection URI, username, and password.
-4. Set `OPENROUTER_API_KEY`, `NEO4J_URI`, `NEO4J_USERNAME`, and `NEO4J_PASSWORD` in your environment. `NEO4J_DATABASE` is optional and defaults to `neo4j`. Add the same variables in Vercel Project Settings for deployment.
+4. Put `OPENROUTER_API_KEY`, `NEO4J_URI`, `NEO4J_USERNAME`, and `NEO4J_PASSWORD` in the project-root `.env` file for local development. `NEO4J_DATABASE` is optional and defaults to `neo4j`. The local server loads this root `.env` even when started with `npm --prefix server start`. Add the same variables in Vercel Project Settings for deployment.
 5. Start the backend with `npm --prefix server start` and the frontend with `npm run dev` in separate terminals.
 
 The Vite development server proxies `/api` requests to the local backend on port 8000. The deployed app uses the serverless handler in `api/chat.js`.
