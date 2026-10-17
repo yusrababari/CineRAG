@@ -375,7 +375,7 @@ export function cleanAnswer(text) {
 export async function runRAG(question) {
   await getChunks();
   const vectorContext = (await getTopChunks(question)).join("\n\n---\n\n");
-  const graphContext = getGraphContext(question);
+  const graphContext = await getGraphContext(question);
   const context = [
     `VECTOR SEARCH RESULTS:\n${vectorContext}`,
     graphContext && `GRAPH SEARCH RESULTS:\n${graphContext}`,
