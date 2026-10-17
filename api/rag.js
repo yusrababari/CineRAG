@@ -147,8 +147,12 @@ async function queryGraph(statement, parameters = {}) {
     throw new Error("NEO4J_URI must use the secure neo4j+s:// or https:// protocol.");
   }
 
-  const endpoint = `https://${parsedUri.host}/db/${encodeURIComponent(database)}/query/v2`;
-  const response = await fetch(endpoint, {
+const endpoint = `https://${parsedUri.host}/db/${encodeURIComponent(database)}/query/v2`;
+
+let response;
+
+try {
+  response = await fetch(endpoint, {
     method: "POST",
     headers: {
       Authorization: `Basic ${Buffer.from(`${username}:${password}`).toString("base64")}`,
@@ -157,6 +161,17 @@ async function queryGraph(statement, parameters = {}) {
     },
     body: JSON.stringify({ statement, parameters }),
   });
+} catch (err) {
+  console.error("Neo4j fetch failed:", {
+    message: err.message,
+    cause: err.cause?.message,
+    code: err.cause?.code,
+    hostname: parsedUri.hostname,
+  });
+
+  throw err;
+}
+
 
   const responseText = await response.text();
   let result;
