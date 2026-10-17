@@ -198,6 +198,7 @@ async function ensureGraphLoaded() {
       );
       console.log(`Loaded graph into Neo4j: ${movies.length} movies, ${reviews.length} reviews`);
     })().catch((err) => {
+      console.error("Neo4j graph import failed:", err);
       graphLoadPromise = null;
       throw err;
     });
