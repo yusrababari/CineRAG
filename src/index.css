@@ -874,3 +874,149 @@ html, body {
   .message.user, .chat-input-area button, .sidebar-link { border: 1px solid ButtonText; }
   .sidebar-link::before { display: none; }
 }
+/* ==========================================================================
+   Additions for the updated Chat component. Paste at the END of index.css.
+   ========================================================================== */
+
+/* Bot answers contain newlines (bullet lines): keep them */
+.message p { white-space: pre-line; }
+
+/* Sidebar rows are <button>s now: reset native button look */
+.sidebar button.sidebar-link {
+  width: 100%;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.sidebar button.sidebar-link:disabled { opacity: .5; cursor: not-allowed; }
+.sidebar button.sidebar-link::after   { content: '↺'; }
+
+/* Long questions get an ellipsis instead of wrapping the card */
+.sidebar-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sidebar-empty {
+  padding: 8px 10px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+/* Header buttons that are disabled (Clear chat with nothing to clear) */
+.icon-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+/* On phones, don't spend a whole row on an empty history strip */
+@media (max-width: 900px) {
+  .sidebar.is-empty { display: none; }
+  .sidebar button.sidebar-link { width: auto; }
+  .sidebar-label { max-width: 200px; }
+}
+/* ==========================================================================
+   Retro terminal theme. Paste at the very END of index.css (after the
+   additions block) so it overrides the earlier sizes.
+   Needs the VT323 font (already in the <link> snippet from before).
+   VT323 is a tall, narrow pixel font, so every size below is scaled up.
+   ========================================================================== */
+
+:root {
+  --font-body: 'VT323', 'Courier New', ui-monospace, monospace;
+  --font-mono: 'Fira Code', ui-monospace, Menlo, Consolas, monospace; /* code blocks stay readable */
+}
+
+html, body { font-size: 18px; -webkit-font-smoothing: none; }
+
+/* Header: blinking block-cursor after the title */
+.chat-header h2 {
+  font-size: clamp(26px, 3vw, 32px);
+  font-weight: 400;
+  letter-spacing: .04em;
+  line-height: 1.1;
+}
+
+.chat-header h2::after {
+  content: '_';
+  margin-left: 4px;
+  color: var(--glow);
+  animation: blink 1s steps(2, start) infinite;
+}
+
+.chat-header p { font-size: 18px; }
+
+/* Messages */
+.message {
+  font-size: 21px;
+  line-height: 1.35;
+  letter-spacing: .01em;
+}
+
+.timestamp { font-size: 16px; }
+
+.message-actions button { font-size: 17px; }
+
+/* Typing line reads like a shell prompt */
+.typing-indicator { font-style: normal; }
+
+/* Empty state */
+.empty-state h3 { font-size: 34px; font-weight: 400; letter-spacing: .02em; }
+.empty-state p  { font-size: 20px; }
+
+/* Chips: shell-prompt style */
+.suggestion-chip { font-size: 19px; padding: 8px 16px; }
+.suggestion-chip::before { content: '>'; font-size: 19px; }
+
+/* Composer */
+.chat-input-area input,
+.chat-input-area textarea { font-size: 22px; padding: 12px 22px; }
+
+.chat-input-area button {
+  font-size: 22px;
+  font-weight: 400;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+/* Sidebar */
+.sidebar-title  { font-size: 26px; font-weight: 400; letter-spacing: .04em; }
+.sidebar-link   { font-size: 19px; font-weight: 400; }
+.sidebar-empty  { font-size: 18px; }
+.sidebar-footer { font-size: 16px; }
+
+.toast { font-size: 18px; }
+.char-counter { font-size: 16px; }
+
+.sentiment-badge { font-size: 18px; }
+
+/* Faint CRT scanlines over the chat (static, pointer-transparent) */
+.chat-container::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, .035) 0,
+    rgba(255, 255, 255, .035) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+}
+
+[data-theme="light"] .chat-container::after {
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(120, 30, 70, .045) 0,
+    rgba(120, 30, 70, .045) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+}
+
+@media (max-width: 560px) {
+  .message { font-size: 20px; }
+  .chat-header h2 { font-size: 26px; }
+}
