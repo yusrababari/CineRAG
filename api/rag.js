@@ -2,6 +2,7 @@
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import OpenAI from "openai";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -9,6 +10,36 @@ let chunks = null;
 let loadPromise = null;
 let graphLoadPromise = null;
 let movieData = null;
+let vectorStore = null;
+let vectorStorePromise = null;
+let openrouter = null;
+const EMBEDDING_MODEL = "openai/text-embedding-3-small";
+const EMBEDDING_BATCH_SIZE = 32;
+
+function getOpenRouter() {
+  if (!process.env.OPENROUTER_API_KEY) {
+    throw new Error(
+      "OPENROUTER_API_KEY is not set. Add it to your environment or project-root .env file."
+    );
+  }
+
+  if (!openrouter) {
+    const siteUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
+      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+      : process.env.SITE_URL || "http://localhost:5173";
+
+    openrouter = new OpenAI({
+      apiKey: process.env.OPENROUTER_API_KEY,
+      baseURL: "https://openrouter.ai/api/v1",
+      defaultHeaders: {
+        "HTTP-Referer": siteUrl,
+        "X-Title": "CineRAG",
+      },
+    });
+  }
+
+  return openrouter;
+}
 
 function findFile(names) {
   for (const name of names) {
@@ -320,50 +351,82 @@ async function getGraphContext(question, limit = 5) {
     .join("\n");
 }
 
-const STOP_WORDS = new Set([
-  "a", "an", "the", "is", "are", "was", "were", "to", "of",
-  "in", "on", "for", "and", "or", "with", "about", "what",
-  "who", "which", "that", "this", "it", "me", "my", "tell",
-  "show", "give", "please", "can", "you", "do", "does",
-]);
+async function embedTexts(texts) {
+  const response = await getOpenRouter().embeddings.create({
+    model: EMBEDDING_MODEL,
+    input: texts,
+  });
 
-function tokenize(text) {
-  return text.toLowerCase().match(/[a-z0-9]+/g)
-    ?.filter((word) => word.length > 1 && !STOP_WORDS.has(word)) || [];
+  if (response.data.length !== texts.length) {
+    throw new Error("Embedding API returned an unexpected number of vectors.");
+  }
+
+  return response.data
+    .sort((a, b) => a.index - b.index)
+    .map(({ embedding }) => embedding);
+}
+
+function cosineSimilarity(a, b) {
+  if (a.length !== b.length) {
+    throw new Error("Embedding vectors have different dimensions.");
+  }
+
+  let dotProduct = 0;
+  let aMagnitude = 0;
+  let bMagnitude = 0;
+
+  for (let i = 0; i < a.length; i += 1) {
+    dotProduct += a[i] * b[i];
+    aMagnitude += a[i] * a[i];
+    bMagnitude += b[i] * b[i];
+  }
+
+  if (!aMagnitude || !bMagnitude) {
+    throw new Error("Embedding vectors cannot be empty.");
+  }
+
+  return dotProduct / (Math.sqrt(aMagnitude) * Math.sqrt(bMagnitude));
+}
+
+async function getVectorStore() {
+  const sourceChunks = await getChunks();
+  if (vectorStore) return vectorStore;
+
+  if (!vectorStorePromise) {
+    vectorStorePromise = (async () => {
+      const vectors = [];
+      for (let start = 0; start < sourceChunks.length; start += EMBEDDING_BATCH_SIZE) {
+        const batch = sourceChunks.slice(start, start + EMBEDDING_BATCH_SIZE);
+        vectors.push(...(await embedTexts(batch)));
+      }
+
+      vectorStore = sourceChunks.map((chunk, index) => ({
+        chunk,
+        embedding: vectors[index],
+      }));
+      console.log(`Indexed ${vectorStore.length} chunks with embeddings`);
+      return vectorStore;
+    })().catch((err) => {
+      vectorStorePromise = null;
+      throw err;
+    });
+  }
+
+  return vectorStorePromise;
 }
 
 async function getTopChunks(question, k = 5) {
-  const sourceChunks = await getChunks();
-  const terms = [...new Set(tokenize(question))];
+  const store = await getVectorStore();
+  const [questionEmbedding] = await embedTexts([question]);
 
-  if (terms.length === 0) return [];
-
-  const questionText = question.toLowerCase();
-
-  return sourceChunks
-    .map((chunk, index) => {
-      const text = chunk.toLowerCase();
-      const words = tokenize(chunk);
-      const wordCounts = new Map();
-
-      for (const word of words) {
-        wordCounts.set(word, (wordCounts.get(word) || 0) + 1);
-      }
-
-      const score = terms.reduce(
-        (total, term) => total + Math.min(wordCounts.get(term) || 0, 3),
-        0
-      );
-
-      const phraseBonus =
-        terms.length > 1 && text.includes(questionText) ? 10 : 0;
-
-      return { chunk, index, score: score + phraseBonus };
-    })
-    .filter((item) => item.score > 0)
-    .sort((a, b) => b.score - a.score || a.index - b.index)
+  return store
+    .map(({ chunk, embedding }) => ({
+      chunk,
+      score: cosineSimilarity(questionEmbedding, embedding),
+    }))
+    .sort((a, b) => b.score - a.score)
     .slice(0, k)
-    .map((item) => item.chunk);
+    .map(({ chunk }) => chunk);
 }
 
 async function loadPdf() {
@@ -434,6 +497,7 @@ export function cleanAnswer(text) {
 }
 
 export async function runRAG(question) {
+  getOpenRouter();
   await getChunks();
 
   const [matchedChunks, graphContext] = await Promise.all([
@@ -454,16 +518,29 @@ export async function runRAG(question) {
     sections.push(`Relevant notes:\n${matchedChunks.join("\n\n---\n\n")}`);
   }
 
-  if (sections.length === 0) {
-    return "🎬 I couldn't find a matching movie in my current data. Try a movie title, actor, director, or genre.";
+  const context = sections.length
+    ? sections.join("\n\n---\n\n")
+    : "No relevant movie data was found.";
+  const completion = await getOpenRouter().chat.completions.create({
+    model: "openrouter/auto",
+    messages: [
+      {
+        role: "system",
+        content:
+          "You are CineRAG, a friendly movie assistant. Answer in clean, simple, plain text. Do NOT use markdown symbols such as *, **, #, or backticks. Keep answers short and easy to read. Use a few friendly emojis (like 🎬 🍿 ⭐ 👍) to make the answer lively.",
+      },
+      {
+        role: "user",
+        content: `Use only the movie data below to answer the question. If it does not contain the answer, say you couldn't find it in the movie database.\n\nDATA:\n${context}\n\nQUESTION: ${question}`,
+      },
+    ],
+    max_tokens: 1000,
+  });
+
+  const answer = completion.choices[0]?.message?.content;
+  if (!answer) {
+    throw new Error("OpenRouter returned an empty chat response.");
   }
 
-  const answer = sections.join("\n\n---\n\n");
-  const maxLength = 5000;
-
-  return cleanAnswer(
-    answer.length > maxLength
-      ? `${answer.slice(0, maxLength)}\n\nMore results may be available.`
-      : answer
-  );
+  return cleanAnswer(answer);
 }

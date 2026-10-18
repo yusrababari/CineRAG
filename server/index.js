@@ -7,14 +7,13 @@ import { runRAG } from "../api/rag.js";
 
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 dotenv.config({ path: path.join(projectRoot, ".env") });
-console.log("Loaded key:", process.env.OPENROUTER_API_KEY ? "✅ Found" : "❌ Missing");
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
 app.get("/", (req, res) => {
-  res.send("🎬 CineRAG server is running with OpenRouter!");
+  res.send("CineRAG server is running. Configure OPENROUTER_API_KEY to use chat.");
 });
 
 app.post("/api/chat", async (req, res) => {
@@ -29,7 +28,8 @@ app.post("/api/chat", async (req, res) => {
     res.json({ answer });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Something went wrong" });
+    const message = err && err.message ? String(err.message) : "Internal server error";
+    res.status(500).json({ error: message });
   }
 });
 

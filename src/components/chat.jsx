@@ -102,14 +102,14 @@ export default function Chat() {
         ...prev,
         { id: Date.now() + 1, sender: "bot", text: cleanAnswer(reply), time: timeNow() },
       ]);
-    } catch {
+    } catch (err) {
       if (requestId.current !== myRequest) return;
       setMessages((prev) => [
         ...prev,
         {
           id: Date.now() + 1,
           sender: "bot",
-          text: "⚠️ Oops, I couldn't reach the server. Please try again!",
+          text: `⚠️ ${err instanceof Error ? err.message : "I couldn't reach the server. Please try again!"}`,
           time: timeNow(),
         },
       ]);

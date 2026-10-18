@@ -7,8 +7,15 @@ export async function askCineRAG(question) {
     body: JSON.stringify({ question }),
   });
 
-  if (!res.ok) throw new Error("Request failed");
-
   const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.error || `Chat request failed (${res.status}).`);
+  }
+
+  if (typeof data.answer !== "string" || !data.answer.trim()) {
+    throw new Error("The chat server returned an empty answer.");
+  }
+
   return data.answer;
 }
