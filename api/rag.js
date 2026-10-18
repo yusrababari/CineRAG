@@ -1,4 +1,3 @@
-
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -13,8 +12,14 @@ let movieData = null;
 let vectorStore = null;
 let vectorStorePromise = null;
 let openrouter = null;
+
 const EMBEDDING_MODEL = "openai/text-embedding-3-small";
 const EMBEDDING_BATCH_SIZE = 32;
+const CHAT_MODEL = process.env.OPENROUTER_MODEL || "openai/gpt-4o-mini";
+
+/* -------------------------------------------------------------------------- */
+/* OpenRouter client                                                          */
+/* -------------------------------------------------------------------------- */
 
 function getOpenRouter() {
   if (!process.env.OPENROUTER_API_KEY) {
@@ -40,6 +45,10 @@ function getOpenRouter() {
 
   return openrouter;
 }
+
+/* -------------------------------------------------------------------------- */
+/* File loading + chunking                                                    */
+/* -------------------------------------------------------------------------- */
 
 function findFile(names) {
   for (const name of names) {
@@ -68,7 +77,12 @@ function chunkText(text, size = 1000, overlap = 150) {
   return result;
 }
 
+/* -------------------------------------------------------------------------- */
+/* Parse notes into movies / relationships / reviews                          */
+/* -------------------------------------------------------------------------- */
+
 function buildMovieGraph(text) {
+  // ---- Section 1: movies ---------------------------------------------------
   const moviesSection = text.split(/^Section 2\b/m)[0];
   const movies = [];
   let currentMovie = null;
@@ -125,18 +139,42 @@ function buildMovieGraph(text) {
     }
   }
 
-  const reviews = [];
-  const reviewsSection = text.split(/^Section 4\b/m)[1] || "";
+  // Longest titles first so "The Signal Room 2" wins over "The Signal Room".
   const titlesByLength = movies
     .map(({ title }) => title)
     .sort((a, b) => b.length - a.length);
 
+  // ---- Section 3: relationships (e.g. "Lena WhitfieldDIRECTEDThe Signal Room-")
+  const relationships = [];
+  const relSection = (text.split(/^Section 3\b/m)[1] || "").split(
+    /^Section 4\b/m
+  )[0];
+
+  for (const rawLine of relSection.split(/\r?\n/)) {
+    const line = rawLine.trim();
+    const m = line.match(/^(.+?)\s*(DIRECTED|ACTED_?IN)\s*(.+)$/);
+    if (!m) continue;
+
+    const rest = m[3].trim();
+    const movie = titlesByLength.find((t) => rest.startsWith(t));
+    if (!movie) continue;
+
+    relationships.push({
+      person: m[1].trim(),
+      type: m[2] === "DIRECTED" ? "DIRECTED" : "ACTED_IN",
+      movie,
+      role: rest.slice(movie.length).trim().replace(/^-$/, ""),
+    });
+  }
+
+  // ---- Section 4: reviews --------------------------------------------------
+  const reviews = [];
+  const reviewsSection = text.split(/^Section 4\b/m)[1] || "";
+
   for (const line of reviewsSection.split(/\r?\n/)) {
     if (!line || line.trim() === "ReviewerMovieStarsComment") continue;
 
-    const title = titlesByLength.find((candidate) =>
-      line.includes(candidate)
-    );
+    const title = titlesByLength.find((candidate) => line.includes(candidate));
 
     if (!title) continue;
 
@@ -156,8 +194,12 @@ function buildMovieGraph(text) {
     });
   }
 
-  return { movies, reviews };
+  return { movies, reviews, relationships };
 }
+
+/* -------------------------------------------------------------------------- */
+/* Neo4j (HTTP Query API)                                                     */
+/* -------------------------------------------------------------------------- */
 
 async function queryGraph(statement, parameters = {}) {
   const uri = process.env.NEO4J_URI;
@@ -166,9 +208,7 @@ async function queryGraph(statement, parameters = {}) {
   const database = process.env.NEO4J_DATABASE || "neo4j";
 
   if (!uri || !username || !password) {
-    throw new Error(
-      "Set NEO4J_URI, NEO4J_USERNAME, and NEO4J_PASSWORD."
-    );
+    throw new Error("Set NEO4J_URI, NEO4J_USERNAME, and NEO4J_PASSWORD.");
   }
 
   let parsedUri;
@@ -179,17 +219,13 @@ async function queryGraph(statement, parameters = {}) {
     throw new Error("NEO4J_URI must be a valid Neo4j Aura URI.");
   }
 
-  if (
-    parsedUri.protocol !== "neo4j+s:" &&
-    parsedUri.protocol !== "https:"
-  ) {
-    throw new Error(
-      "NEO4J_URI must use neo4j+s:// or https://."
-    );
+  if (parsedUri.protocol !== "neo4j+s:" && parsedUri.protocol !== "https:") {
+    throw new Error("NEO4J_URI must use neo4j+s:// or https://.");
   }
 
-  const endpoint =
-    `https://${parsedUri.host}/db/${encodeURIComponent(database)}/query/v2`;
+  const endpoint = `https://${parsedUri.host}/db/${encodeURIComponent(
+    database
+  )}/query/v2`;
 
   let response;
 
@@ -197,8 +233,9 @@ async function queryGraph(statement, parameters = {}) {
     response = await fetch(endpoint, {
       method: "POST",
       headers: {
-        Authorization:
-          `Basic ${Buffer.from(`${username}:${password}`).toString("base64")}`,
+        Authorization: `Basic ${Buffer.from(`${username}:${password}`).toString(
+          "base64"
+        )}`,
         "Content-Type": "application/json",
         Accept: "application/json",
       },
@@ -232,17 +269,17 @@ async function queryGraph(statement, parameters = {}) {
 
   if (!response.ok) {
     throw new Error(
-      `Neo4j request failed (${response.status}): ${
-        JSON.stringify(result.errors || result)
-      }`
+      `Neo4j request failed (${response.status}): ${JSON.stringify(
+        result.errors || result
+      )}`
     );
   }
 
   if (result.errors?.length) {
     throw new Error(
-      `Neo4j query failed: ${
-        result.errors.map((error) => error.message).join("; ")
-      }`
+      `Neo4j query failed: ${result.errors
+        .map((error) => error.message)
+        .join("; ")}`
     );
   }
 
@@ -254,7 +291,7 @@ async function ensureGraphLoaded() {
     graphLoadPromise = (async () => {
       await getChunks();
 
-      const { movies, reviews } = movieData;
+      const { movies, reviews, relationships } = movieData;
 
       await queryGraph(
         "CREATE CONSTRAINT movie_title IF NOT EXISTS FOR (m:Movie) REQUIRE m.title IS UNIQUE"
@@ -268,33 +305,58 @@ async function ensureGraphLoaded() {
         "CREATE CONSTRAINT genre_name IF NOT EXISTS FOR (g:Genre) REQUIRE g.name IS UNIQUE"
       );
 
+      // Movies
       await queryGraph(
         "UNWIND $movies AS row MERGE (m:Movie {title: row.title}) SET m.year = toInteger(row.year), m.rating = toFloat(row.rating), m.synopsis = row.synopsis",
         { movies }
       );
 
+      // Genres
       await queryGraph(
         "UNWIND $movies AS row MATCH (m:Movie {title: row.title}) UNWIND row.genres AS name MERGE (g:Genre {name: name}) MERGE (m)-[:IN_GENRE]->(g)",
         { movies }
       );
 
+      // Directors from Section 1 (skip empty names)
       await queryGraph(
-        "UNWIND $movies AS row MATCH (m:Movie {title: row.title}) MERGE (p:Person {name: row.director}) MERGE (p)-[:DIRECTED]->(m)",
+        "UNWIND $movies AS row WITH row WHERE row.director <> '' MATCH (m:Movie {title: row.title}) MERGE (p:Person {name: row.director}) MERGE (p)-[:DIRECTED]->(m)",
         { movies }
       );
 
+      // Cast from Section 1
       await queryGraph(
         "UNWIND $movies AS row MATCH (m:Movie {title: row.title}) UNWIND row.cast AS member MERGE (p:Person {name: member.name}) MERGE (p)-[r:ACTED_IN]->(m) SET r.role = member.role",
         { movies }
       );
 
+      // Relationships from Section 3
+      await queryGraph(
+        `UNWIND $rels AS r
+         WITH r WHERE r.type = 'DIRECTED'
+         MATCH (m:Movie {title: r.movie})
+         MERGE (p:Person {name: r.person})
+         MERGE (p)-[:DIRECTED]->(m)`,
+        { rels: relationships }
+      );
+
+      await queryGraph(
+        `UNWIND $rels AS r
+         WITH r WHERE r.type = 'ACTED_IN'
+         MATCH (m:Movie {title: r.movie})
+         MERGE (p:Person {name: r.person})
+         MERGE (p)-[a:ACTED_IN]->(m)
+         SET a.role = r.role`,
+        { rels: relationships }
+      );
+
+      // Reviews from Section 4
       await queryGraph(
         "UNWIND $reviews AS row MATCH (m:Movie {title: row.movie}) MERGE (reviewer:Person {name: row.reviewer}) MERGE (reviewer)-[r:REVIEWED {comment: row.comment}]->(m) SET r.stars = row.stars",
         { reviews }
       );
 
       console.log(
-        `Loaded graph into Neo4j: ${movies.length} movies, ${reviews.length} reviews`
+        `Loaded graph into Neo4j: ${movies.length} movies, ${relationships.length} relationships, ${reviews.length} reviews`
       );
     })().catch((err) => {
       console.error("Neo4j graph import failed:", err);
@@ -306,7 +368,7 @@ async function ensureGraphLoaded() {
   return graphLoadPromise;
 }
 
-async function getGraphContext(question, limit = 5) {
+async function getGraphContext(question, limit = 8) {
   await ensureGraphLoaded();
 
   const rows = await queryGraph(
@@ -314,31 +376,31 @@ async function getGraphContext(question, limit = 5) {
       "MATCH (seed)",
       "WHERE (seed:Movie AND toLower($question) CONTAINS toLower(seed.title))",
       "OR ((seed:Person OR seed:Genre) AND toLower($question) CONTAINS toLower(seed.name))",
-      "WITH collect(DISTINCT seed) AS seeds",
-      "UNWIND seeds AS seed",
-      "OPTIONAL MATCH (seed)-[*1..2]-(related:Movie)",
-      "WITH seeds, collect(DISTINCT related) + [item IN seeds WHERE item:Movie] AS candidates",
-      "UNWIND candidates AS movie",
-      "WITH DISTINCT movie ORDER BY movie.title LIMIT $limit",
+      "OPTIONAL MATCH (seed)-[:DIRECTED|ACTED_IN|IN_GENRE|REVIEWED]-(related:Movie)",
+      "WITH collect(DISTINCT CASE WHEN seed:Movie THEN seed END) AS direct, collect(DISTINCT related) AS rel",
+      "WITH direct + [r IN rel WHERE NOT r IN direct] AS ms",
+      "UNWIND range(0, size(ms) - 1) AS i",
+      "WITH ms[i] AS movie, i ORDER BY i LIMIT $limit",
       "OPTIONAL MATCH (director:Person)-[:DIRECTED]->(movie)",
       "OPTIONAL MATCH (actor:Person)-[acted:ACTED_IN]->(movie)",
       "OPTIONAL MATCH (movie)-[:IN_GENRE]->(genre:Genre)",
       "OPTIONAL MATCH (reviewer:Person)-[review:REVIEWED]->(movie)",
-      "RETURN movie.title, movie.year, movie.rating, movie.synopsis, director.name,",
+      "RETURN movie.title, movie.year, movie.rating, movie.synopsis,",
+      "collect(DISTINCT director.name),",
       "collect(DISTINCT genre.name),",
       "collect(DISTINCT CASE WHEN actor IS NULL THEN null ELSE actor.name + ' as ' + acted.role END),",
       "collect(DISTINCT CASE WHEN review IS NULL THEN null ELSE reviewer.name + ': ' + toString(review.stars) + '/10 - ' + review.comment END)[0..3]",
     ].join(" "),
-    { question: question.toLowerCase(), limit }
+    { question, limit }
   );
 
   return rows
-    .map(([title, year, rating, synopsis, director, genres, cast, reviews]) => {
+    .map(([title, year, rating, synopsis, directors, genres, cast, reviews]) => {
       const details = [
         `${title} (${year})`,
-        director && `Director: ${director}`,
+        directors?.length && `Director: ${directors.join(", ")}`,
         genres?.length && `Genres: ${genres.join(", ")}`,
-        rating !== null && rating !== undefined && `Rating: ${rating}/10`,
+        rating != null && `Rating: ${rating}/10`,
         cast?.length && `Cast: ${cast.join(", ")}`,
         synopsis && `Synopsis: ${synopsis}`,
         reviews?.length && `Reviews: ${reviews.join(" | ")}`,
@@ -350,6 +412,10 @@ async function getGraphContext(question, limit = 5) {
     })
     .join("\n");
 }
+
+/* -------------------------------------------------------------------------- */
+/* Embeddings / vector search                                                 */
+/* -------------------------------------------------------------------------- */
 
 async function embedTexts(texts) {
   const response = await getOpenRouter().embeddings.create({
@@ -395,7 +461,12 @@ async function getVectorStore() {
   if (!vectorStorePromise) {
     vectorStorePromise = (async () => {
       const vectors = [];
-      for (let start = 0; start < sourceChunks.length; start += EMBEDDING_BATCH_SIZE) {
+
+      for (
+        let start = 0;
+        start < sourceChunks.length;
+        start += EMBEDDING_BATCH_SIZE
+      ) {
         const batch = sourceChunks.slice(start, start + EMBEDDING_BATCH_SIZE);
         vectors.push(...(await embedTexts(batch)));
       }
@@ -404,6 +475,7 @@ async function getVectorStore() {
         chunk,
         embedding: vectors[index],
       }));
+
       console.log(`Indexed ${vectorStore.length} chunks with embeddings`);
       return vectorStore;
     })().catch((err) => {
@@ -415,7 +487,7 @@ async function getVectorStore() {
   return vectorStorePromise;
 }
 
-async function getTopChunks(question, k = 5) {
+async function getTopChunks(question, k = 4) {
   const store = await getVectorStore();
   const [questionEmbedding] = await embedTexts([question]);
 
@@ -429,6 +501,10 @@ async function getTopChunks(question, k = 5) {
     .map(({ chunk }) => chunk);
 }
 
+/* -------------------------------------------------------------------------- */
+/* Load notes (txt first, then pdf)                                           */
+/* -------------------------------------------------------------------------- */
+
 async function loadPdf() {
   const txtPath = findFile(["notes.txt", "data/notes.txt"]);
 
@@ -439,7 +515,7 @@ async function loadPdf() {
 
     console.log(`Loaded notes: ${chunks.length} chunks`);
     console.log(
-      `Parsed movie data: ${movieData.movies.length} movies, ${movieData.reviews.length} reviews`
+      `Parsed movie data: ${movieData.movies.length} movies, ${movieData.relationships.length} relationships, ${movieData.reviews.length} reviews`
     );
 
     return;
@@ -459,7 +535,7 @@ async function loadPdf() {
 
   console.log(`Loaded PDF: ${chunks.length} chunks`);
   console.log(
-    `Parsed movie data: ${movieData.movies.length} movies, ${movieData.reviews.length} reviews`
+    `Parsed movie data: ${movieData.movies.length} movies, ${movieData.relationships.length} relationships, ${movieData.reviews.length} reviews`
   );
 }
 
@@ -475,6 +551,10 @@ function getChunks() {
 
   return loadPromise;
 }
+
+/* -------------------------------------------------------------------------- */
+/* Answer cleanup + RAG entry point                                           */
+/* -------------------------------------------------------------------------- */
 
 export function cleanAnswer(text) {
   if (!text) return text;
@@ -501,43 +581,51 @@ export async function runRAG(question) {
   await getChunks();
 
   const [matchedChunks, graphContext] = await Promise.all([
-    getTopChunks(question, 5),
+    getTopChunks(question, 4).catch((err) => {
+      console.error("Vector search failed:", err.message);
+      return [];
+    }),
     getGraphContext(question).catch((err) => {
       console.error("Neo4j search failed:", err.message);
       return "";
     }),
   ]);
 
-  const sections = [];
+  let context;
 
   if (graphContext) {
-    sections.push(`Movie database results:\n${graphContext}`);
+    context =
+      `Movie database (authoritative, from Neo4j):\n${graphContext}` +
+      (matchedChunks.length
+        ? `\n\nSupporting notes (raw text, may be messy):\n${matchedChunks.join(
+            "\n---\n"
+          )}`
+        : "");
+  } else if (matchedChunks.length) {
+    context = `Notes (raw text, may be messy):\n${matchedChunks.join("\n---\n")}`;
+  } else {
+    context = "No relevant movie data was found.";
   }
 
-  if (matchedChunks.length) {
-    sections.push(`Relevant notes:\n${matchedChunks.join("\n\n---\n\n")}`);
-  }
-
-  const context = sections.length
-    ? sections.join("\n\n---\n\n")
-    : "No relevant movie data was found.";
   const completion = await getOpenRouter().chat.completions.create({
-    model: "openrouter/auto",
+    model: CHAT_MODEL,
+    temperature: 0,
     messages: [
       {
         role: "system",
         content:
-          "You are CineRAG, a friendly movie assistant. Answer in clean, simple, plain text. Do NOT use markdown symbols such as *, **, #, or backticks. Keep answers short and easy to read. Use a few friendly emojis (like 🎬 🍿 ⭐ 👍) to make the answer lively.",
+          "You are CineRAG, a friendly movie assistant. Answer in short, plain text with a few emojis (🎬 🍿 ⭐ 👍). Do NOT use markdown symbols such as *, **, #, or backticks. Prefer the Movie database section over the notes. Answer only from the provided data. If the answer is not in the data, say you couldn't find it in the movie database.",
       },
       {
         role: "user",
-        content: `Use only the movie data below to answer the question. If it does not contain the answer, say you couldn't find it in the movie database.\n\nDATA:\n${context}\n\nQUESTION: ${question}`,
+        content: `DATA:\n${context}\n\nQUESTION: ${question}`,
       },
     ],
-    max_tokens: 1000,
+    max_tokens: 500,
   });
 
   const answer = completion.choices[0]?.message?.content;
+
   if (!answer) {
     throw new Error("OpenRouter returned an empty chat response.");
   }
