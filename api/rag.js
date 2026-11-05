@@ -205,7 +205,7 @@ async function queryGraph(statement, parameters = {}) {
   const uri = process.env.NEO4J_URI?.trim();
   const username = process.env.NEO4J_USERNAME?.trim() || process.env.NEO4J_USER?.trim();
   const password = process.env.NEO4J_PASSWORD;
-  const database = process.env.NEO4J_DATABASE?.trim() || "neo4j";
+  const configuredDatabase = process.env.NEO4J_DATABASE?.trim();
 
   if (!uri || !username || !password) {
     throw new Error(
@@ -231,6 +231,12 @@ async function queryGraph(statement, parameters = {}) {
       "NEO4J_URI must be an Aura neo4j+s:// or bolt+s:// URI, or an HTTPS Query API URI."
     );
   }
+
+  const database =
+    configuredDatabase ||
+    (parsedUri.hostname.endsWith(".databases.neo4j.io")
+      ? parsedUri.hostname.split(".")[0]
+      : "neo4j");
 
   // neo4j+s URIs describe the Bolt endpoint (usually port 7687), not HTTPS.
   const host = boltProtocols.includes(parsedUri.protocol)
