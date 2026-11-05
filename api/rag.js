@@ -15,7 +15,7 @@ let openrouter = null;
 
 const EMBEDDING_MODEL = "openai/text-embedding-3-small";
 const EMBEDDING_BATCH_SIZE = 32;
-const CHAT_MODEL = process.env.OPENROUTER_MODEL || "openai/gpt-4o-mini";
+const NEO4J_REQUEST_TIMEOUT_MS = 15000;
 
 /* -------------------------------------------------------------------------- */
 /* OpenRouter client                                                          */
@@ -219,19 +219,30 @@ async function queryGraph(statement, parameters = {}) {
     throw new Error("NEO4J_URI must be a valid Neo4j Aura URI.");
   }
 
-  if (parsedUri.protocol !== "neo4j+s:" && parsedUri.protocol !== "https:") {
+  if (
+    (parsedUri.protocol !== "neo4j+s:" && parsedUri.protocol !== "https:") ||
+    !parsedUri.hostname
+  ) {
     throw new Error("NEO4J_URI must use neo4j+s:// or https://.");
   }
 
-  const endpoint = `https://${parsedUri.host}/db/${encodeURIComponent(
-    database
-  )}/query/v2`;
+  // neo4j+s URIs describe the Bolt endpoint (usually port 7687), not HTTPS.
+  const host = parsedUri.protocol === "neo4j+s:"
+    ? parsedUri.hostname
+    : parsedUri.host;
+  const endpoint = `https://${host}/db/${encodeURIComponent(database)}/query/v2`;
 
   let response;
+  const controller = new AbortController();
+  const timeout = setTimeout(
+    () => controller.abort(),
+    NEO4J_REQUEST_TIMEOUT_MS
+  );
 
   try {
     response = await fetch(endpoint, {
       method: "POST",
+      signal: controller.signal,
       headers: {
         Authorization: `Basic ${Buffer.from(`${username}:${password}`).toString(
           "base64"
@@ -250,6 +261,8 @@ async function queryGraph(statement, parameters = {}) {
     });
 
     throw err;
+  } finally {
+    clearTimeout(timeout);
   }
 
   const responseText = await response.text();
@@ -283,7 +296,18 @@ async function queryGraph(statement, parameters = {}) {
     );
   }
 
-  return result.data?.values || [];
+  if (!Array.isArray(result.data?.values)) {
+    throw new Error("Neo4j returned a response without query results.");
+  }
+
+  return result.data.values;
+}
+
+export async function checkNeo4jConnection() {
+  const rows = await queryGraph("RETURN 1 AS connected");
+  if (rows[0]?.[0] !== 1) {
+    throw new Error("Neo4j connection check returned an unexpected result.");
+  }
 }
 
 async function ensureGraphLoaded() {
@@ -581,10 +605,12 @@ export async function runRAG(question) {
   await getChunks();
 
   const [matchedChunks, graphContext] = await Promise.all([
-    getTopChunks(question, 4).catch((err) => {
-      console.error("Vector search failed:", err.message);
-      return [];
-    }),
+    /^(1|true|yes)$/i.test(process.env.DISABLE_EMBEDDINGS || "")
+      ? Promise.resolve([])
+      : getTopChunks(question, 4).catch((err) => {
+          console.error("Vector search failed:", err.message);
+          return [];
+        }),
     getGraphContext(question).catch((err) => {
       console.error("Neo4j search failed:", err.message);
       return "";
@@ -608,7 +634,7 @@ export async function runRAG(question) {
   }
 
   const completion = await getOpenRouter().chat.completions.create({
-    model: CHAT_MODEL,
+    model: process.env.OPENROUTER_MODEL || "openai/gpt-4o-mini",
     temperature: 0,
     messages: [
       {
