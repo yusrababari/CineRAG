@@ -1,6 +1,30 @@
 import { useState, useEffect, useRef } from "react";
 import { askCineRAG } from "../api/chat";
 
+function formatAnswer(text) {
+  const lines = text.split("\n");
+
+  return lines.map((line, index) => {
+    const match = line.match(/^([^:]+)(:)(\s*)(.*)$/);
+
+    return (
+      <span key={index}>
+        {match ? (
+          <>
+            <strong>{match[1]}</strong>
+            {match[2]}
+            {match[3]}
+            {match[4]}
+          </>
+        ) : (
+          line
+        )}
+        {index < lines.length - 1 && <br />}
+      </span>
+    );
+  });
+}
+
 const suggestions = [
   "Recommend a sci-fi thriller",
   "Who directed The Signal Room?",
@@ -211,7 +235,9 @@ export default function Chat() {
                 {msg.sender === "bot" ? "🎬" : "🙂"}
               </div>
               <div className={`message ${msg.sender}`}>
-                <p>{msg.text}</p>
+                <p>
+                  {msg.sender === "bot" ? formatAnswer(msg.text) : msg.text}
+                </p>
                 <span className="timestamp">{msg.time}</span>
                 {msg.sender === "bot" && (
                   <div className="message-actions">
