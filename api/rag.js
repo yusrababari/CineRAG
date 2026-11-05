@@ -423,20 +423,23 @@ async function getGraphContext(question, limit = 8) {
     [
       "MATCH (seed)",
       "WHERE (seed:Movie AND toLower($question) CONTAINS toLower(seed.title))",
-      "OR ((seed:Person OR seed:Genre) AND toLower($question) CONTAINS toLower(seed.name))",
-      "OPTIONAL MATCH (seed)-[:DIRECTED|ACTED_IN|IN_GENRE|REVIEWED]-(related:Movie)",
+      "OR ((seed:Person OR seed:Actor OR seed:Director) AND toLower($question) CONTAINS toLower(seed.name))",
+      "OR (seed:Genre AND any(name IN split(seed.name, ';') WHERE toLower($question) CONTAINS toLower(trim(name))))",
+      "OPTIONAL MATCH (seed)-[:DIRECTED|ACTED_IN|IN_GENRE|REVIEWED|DIRECTED_BY|HAS_GENRE]-(related:Movie)",
       "WITH collect(DISTINCT CASE WHEN seed:Movie THEN seed END) AS direct, collect(DISTINCT related) AS rel",
       "WITH direct + [r IN rel WHERE NOT r IN direct] AS ms",
       "UNWIND range(0, size(ms) - 1) AS i",
       "WITH ms[i] AS movie, i ORDER BY i LIMIT $limit",
-      "OPTIONAL MATCH (director:Person)-[:DIRECTED]->(movie)",
-      "OPTIONAL MATCH (actor:Person)-[acted:ACTED_IN]->(movie)",
-      "OPTIONAL MATCH (movie)-[:IN_GENRE]->(genre:Genre)",
+      "OPTIONAL MATCH (director)-[:DIRECTED|DIRECTED_BY]-(movie)",
+      "WHERE director:Person OR director:Director",
+      "OPTIONAL MATCH (actor)-[acted:ACTED_IN]-(movie)",
+      "WHERE actor:Person OR actor:Actor",
+      "OPTIONAL MATCH (movie)-[:IN_GENRE|HAS_GENRE]-(genre:Genre)",
       "OPTIONAL MATCH (reviewer:Person)-[review:REVIEWED]->(movie)",
       "RETURN movie.title, movie.year, movie.rating, movie.synopsis,",
       "collect(DISTINCT director.name),",
       "collect(DISTINCT genre.name),",
-      "collect(DISTINCT CASE WHEN actor IS NULL THEN null ELSE actor.name + ' as ' + acted.role END),",
+      "collect(DISTINCT CASE WHEN actor IS NULL THEN null ELSE actor.name + CASE WHEN acted.role IS NULL THEN '' ELSE ' as ' + acted.role END END),",
       "collect(DISTINCT CASE WHEN review IS NULL THEN null ELSE reviewer.name + ': ' + toString(review.stars) + '/10 - ' + review.comment END)[0..3]",
     ].join(" "),
     { question, limit }
@@ -444,10 +447,18 @@ async function getGraphContext(question, limit = 8) {
 
   return rows
     .map(([title, year, rating, synopsis, directors, genres, cast, reviews]) => {
+      const genreNames = [
+        ...new Set(
+          (genres || [])
+            .flatMap((genre) => String(genre).split(";"))
+            .map((genre) => genre.trim())
+            .filter(Boolean)
+        ),
+      ];
       const details = [
         `${title} (${year})`,
         directors?.length && `Director: ${directors.join(", ")}`,
-        genres?.length && `Genres: ${genres.join(", ")}`,
+        genreNames.length && `Genres: ${genreNames.join(", ")}`,
         rating != null && `Rating: ${rating}/10`,
         cast?.length && `Cast: ${cast.join(", ")}`,
         synopsis && `Synopsis: ${synopsis}`,
