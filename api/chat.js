@@ -28,10 +28,19 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { question } = req.body;
+    const question =
+      req.body && typeof req.body.question === "string"
+        ? req.body.question.trim()
+        : "";
 
     if (!question) {
-      return res.status(400).json({ error: "Missing question" });
+      return res.status(400).json({ error: "A non-empty question is required." });
+    }
+
+    if (question.length > 2000) {
+      return res
+        .status(400)
+        .json({ error: "Question must be 2000 characters or fewer." });
     }
 
     const answer = await runRAG(question);

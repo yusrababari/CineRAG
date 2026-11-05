@@ -7,7 +7,16 @@ export async function askCineRAG(question) {
     body: JSON.stringify({ question }),
   });
 
-  const data = await res.json();
+  let data;
+  try {
+    data = await res.json();
+  } catch {
+    throw new Error(`Chat request failed (${res.status}): invalid server response.`);
+  }
+
+  if (!data || typeof data !== "object") {
+    throw new Error(`Chat request failed (${res.status}): invalid server response.`);
+  }
 
   if (!res.ok) {
     throw new Error(data.error || `Chat request failed (${res.status}).`);
