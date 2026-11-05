@@ -24,9 +24,9 @@ function cleanAnswer(text) {
       const bullet = line.trim().match(/^[-*•]\s+(.*)$/);
       return bullet ? "🍿 " + bullet[1] : line.trim();
     })
-    .filter(Boolean)
     .join("\n")
-    .replace(/\s{2,}/g, " ")
+    .replace(/[ \t]{2,}/g, " ")
+    .replace(/\n{3,}/g, "\n\n")
     .trim();
 }
 

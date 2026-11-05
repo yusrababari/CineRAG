@@ -618,7 +618,7 @@ function normalizeText(text) {
 function formatMovie(movie) {
   return [
     `${movie.title} (${movie.year})`,
-    movie.genres.length && `Genres: ${movie.genres.join(", ")}`,
+    movie.genres.length && `Genre: ${movie.genres.join(", ")}`,
     movie.director && `Director: ${movie.director}`,
     movie.rating && `Rating: ${movie.rating}/10`,
     movie.cast.length &&
@@ -626,7 +626,7 @@ function formatMovie(movie) {
     movie.synopsis && `Synopsis: ${movie.synopsis}`,
   ]
     .filter(Boolean)
-    .join(" · ");
+    .join("\n");
 }
 
 function answerLocally(question) {
@@ -815,8 +815,8 @@ export function cleanAnswer(text) {
       const bullet = line.trim().match(/^[-*•]\s+(.*)$/);
       return bullet ? `🍿 ${bullet[1]}` : line.trim();
     })
-    .filter(Boolean)
     .join("\n")
+    .replace(/\n{3,}/g, "\n\n")
     .trim();
 }
 
@@ -876,7 +876,7 @@ export async function runRAG(question) {
       {
         role: "system",
         content:
-          "You are CineRAG, a friendly movie assistant. Answer in short, plain text with a few emojis (🎬 🍿 ⭐ 👍). Do NOT use markdown symbols such as *, **, #, or backticks. Prefer the Movie database section over the notes. Answer only from the provided data. If the answer is not in the data, say you couldn't find it in the movie database.",
+          "You are CineRAG, a friendly movie assistant. Answer in short, plain text with a few emojis (🎬 🍿 ⭐ 👍). Put each movie on its own block: title and year on the first line, then genre, rating, and other useful details on separate lines. Leave a blank line between movies. Do NOT use markdown symbols such as *, **, #, or backticks. Prefer the Movie database section over the notes. Answer only from the provided data. If the answer is not in the data, say you couldn't find it in the movie database.",
       },
       {
         role: "user",
