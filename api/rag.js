@@ -576,6 +576,191 @@ function getChunks() {
   return loadPromise;
 }
 
+function normalizeText(text) {
+  return text.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+}
+
+function formatMovie(movie) {
+  return [
+    `${movie.title} (${movie.year})`,
+    movie.genres.length && `Genres: ${movie.genres.join(", ")}`,
+    movie.director && `Director: ${movie.director}`,
+    movie.rating && `Rating: ${movie.rating}/10`,
+    movie.cast.length &&
+      `Cast: ${movie.cast.map(({ name, role }) => `${name} as ${role}`).join(", ")}`,
+    movie.synopsis && `Synopsis: ${movie.synopsis}`,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+}
+
+function answerLocally(question) {
+  const { movies, reviews } = movieData;
+  const normalizedQuestion = normalizeText(question);
+  const matchedMovies = movies.filter((movie) =>
+    normalizedQuestion.includes(normalizeText(movie.title))
+  );
+
+  if (matchedMovies.length) {
+    return matchedMovies.map((movie) => {
+      const movieReviews = reviews
+        .filter((review) => review.movie === movie.title)
+        .slice(0, 2)
+        .map(({ reviewer, stars, comment }) =>
+          `${reviewer} (${stars}/10): ${comment}`
+        );
+
+      return [
+        formatMovie(movie),
+        movieReviews.length && `Reviews: ${movieReviews.join(" | ")}`,
+      ]
+        .filter(Boolean)
+        .join("\n");
+    }).join("\n\n");
+  }
+
+  const yearMatch = normalizedQuestion.match(/\b(19|20)\d{2}\b/);
+  const year = yearMatch ? Number(yearMatch[0]) : null;
+  const isAfterYear = /\b(after|newer than)\b/.test(normalizedQuestion);
+  const isSinceYear = /\bsince\b/.test(normalizedQuestion);
+  const isBeforeYear = /\b(before|older than)\b/.test(normalizedQuestion);
+  const yearFiltered = year
+    ? movies.filter((movie) => {
+        const movieYear = Number(movie.year);
+        if (isAfterYear) {
+          return movieYear > year;
+        }
+        if (isSinceYear) {
+          return movieYear >= year;
+        }
+        if (isBeforeYear) {
+          return movieYear < year;
+        }
+        return movieYear === year;
+      })
+    : movies;
+
+  if (/\b(average|avg|mean)\b/.test(normalizedQuestion) &&
+      /\b(rating|rated|score)\b/.test(normalizedQuestion)) {
+    const genre = movies
+      .flatMap((movie) => movie.genres)
+      .find((name) => normalizedQuestion.includes(normalizeText(name)));
+    const ratedMovies = yearFiltered.filter(
+      (movie) =>
+        movie.rating &&
+        (!genre || movie.genres.includes(genre))
+    );
+
+    if (ratedMovies.length) {
+      const average =
+        ratedMovies.reduce((sum, movie) => sum + Number(movie.rating), 0) /
+        ratedMovies.length;
+      return `The average rating${
+        genre ? ` for ${genre} movies` : ""
+      } is ${average.toFixed(1)}/10 across ${ratedMovies.length} movies.`;
+    }
+  }
+
+  const genres = [...new Set(movies.flatMap((movie) => movie.genres))];
+  const matchedGenres = genres.filter((genre) =>
+    normalizedQuestion.includes(normalizeText(genre))
+  );
+  const person = [...new Set(
+    movies.flatMap((movie) => [
+      movie.director,
+      ...movie.cast.map(({ name }) => name),
+    ])
+  )].find(
+    (name) =>
+      name && normalizedQuestion.includes(normalizeText(name))
+  );
+
+  if (person) {
+    const personMovies = movies.filter(
+      (movie) =>
+        movie.director === person ||
+        movie.cast.some(({ name }) => name === person)
+    );
+    if (personMovies.length) {
+      return `${person} is associated with ${personMovies.length} movie${
+        personMovies.length === 1 ? "" : "s"
+      }:\n${personMovies.map(formatMovie).join("\n")}`;
+    }
+  }
+
+  if (matchedGenres.length || year) {
+    let filtered = yearFiltered.filter((movie) =>
+      matchedGenres.every((genre) => movie.genres.includes(genre))
+    );
+    if (!filtered.length && matchedGenres.length > 1) {
+      filtered = yearFiltered.filter((movie) =>
+        matchedGenres.some((genre) => movie.genres.includes(genre))
+      );
+    }
+
+    filtered.sort((a, b) => Number(b.rating || 0) - Number(a.rating || 0));
+    if (filtered.length) {
+      const yearDescription = year
+        ? isAfterYear
+          ? `released after ${year}`
+          : isSinceYear
+            ? `released since ${year}`
+            : isBeforeYear
+              ? `released before ${year}`
+              : `released in ${year}`
+        : "";
+      const label = [
+        matchedGenres.length && matchedGenres.join(" / "),
+        yearDescription,
+      ].filter(Boolean).join(" ");
+      return `Here are ${label ? `${label} ` : ""}from the dataset, sorted by rating:\n${filtered
+        .slice(0, 5)
+        .map(formatMovie)
+        .join("\n")}`;
+    }
+  }
+
+  const ignoredWords = new Set([
+    "about", "after", "and", "are", "before", "can", "cast", "find",
+    "for", "from", "give", "movie", "movies", "recommend", "show", "some",
+    "tell", "the", "what", "when", "where", "which", "who", "with",
+  ]);
+  const keywords = normalizedQuestion
+    .split(" ")
+    .filter((word) => word.length > 2 && !ignoredWords.has(word));
+  const scored = movies
+    .map((movie) => {
+      const title = normalizeText(movie.title);
+      const synopsis = normalizeText(movie.synopsis);
+      const details = normalizeText(
+        `${movie.genres.join(" ")} ${movie.director} ${movie.cast
+          .map(({ name, role }) => `${name} ${role}`)
+          .join(" ")}`
+      );
+      const score = keywords.reduce(
+        (total, word) =>
+          total +
+          (title.includes(word) ? 4 : 0) +
+          (synopsis.includes(word) ? 2 : 0) +
+          (details.includes(word) ? 1 : 0),
+        0
+      );
+      return { movie, score };
+    })
+    .filter(({ score }) => score > 0)
+    .sort((a, b) => b.score - a.score || Number(b.movie.rating) - Number(a.movie.rating))
+    .slice(0, 3)
+    .map(({ movie }) => movie);
+
+  if (scored.length) {
+    return `These movies look relevant to your question:\n${scored
+      .map(formatMovie)
+      .join("\n")}`;
+  }
+
+  return "I couldn't find that in the movie dataset. Try asking about a movie title, actor, director, genre, or release year.";
+}
+
 /* -------------------------------------------------------------------------- */
 /* Answer cleanup + RAG entry point                                           */
 /* -------------------------------------------------------------------------- */
@@ -601,8 +786,11 @@ export function cleanAnswer(text) {
 }
 
 export async function runRAG(question) {
-  getOpenRouter();
   await getChunks();
+
+  if (!process.env.OPENROUTER_API_KEY?.trim()) {
+    return answerLocally(question);
+  }
 
   const [matchedChunks, graphContext] = await Promise.all([
     /^(1|true|yes)$/i.test(process.env.DISABLE_EMBEDDINGS || "")
