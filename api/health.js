@@ -22,6 +22,10 @@ export default async function handler(req, res) {
     return res.status(200).json({ status: "ok", neo4j: "connected" });
   } catch (err) {
     console.error("Neo4j health check failed:", err);
-    return res.status(503).json({ status: "error", neo4j: "unavailable" });
+    return res.status(503).json({
+      status: "error",
+      neo4j: "unavailable",
+      error: err instanceof Error ? err.message : "Unknown Neo4j error",
+    });
   }
 }

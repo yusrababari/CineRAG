@@ -202,13 +202,15 @@ function buildMovieGraph(text) {
 /* -------------------------------------------------------------------------- */
 
 async function queryGraph(statement, parameters = {}) {
-  const uri = process.env.NEO4J_URI;
-  const username = process.env.NEO4J_USERNAME;
+  const uri = process.env.NEO4J_URI?.trim();
+  const username = process.env.NEO4J_USERNAME?.trim() || process.env.NEO4J_USER?.trim();
   const password = process.env.NEO4J_PASSWORD;
-  const database = process.env.NEO4J_DATABASE || "neo4j";
+  const database = process.env.NEO4J_DATABASE?.trim() || "neo4j";
 
   if (!uri || !username || !password) {
-    throw new Error("Set NEO4J_URI, NEO4J_USERNAME, and NEO4J_PASSWORD.");
+    throw new Error(
+      "Neo4j is not configured. Set NEO4J_URI, NEO4J_USERNAME (or NEO4J_USER), and NEO4J_PASSWORD in the backend environment."
+    );
   }
 
   let parsedUri;
@@ -219,15 +221,19 @@ async function queryGraph(statement, parameters = {}) {
     throw new Error("NEO4J_URI must be a valid Neo4j Aura URI.");
   }
 
+  const boltProtocols = ["neo4j+s:", "bolt+s:"];
   if (
-    (parsedUri.protocol !== "neo4j+s:" && parsedUri.protocol !== "https:") ||
+    (!boltProtocols.includes(parsedUri.protocol) &&
+      parsedUri.protocol !== "https:") ||
     !parsedUri.hostname
   ) {
-    throw new Error("NEO4J_URI must use neo4j+s:// or https://.");
+    throw new Error(
+      "NEO4J_URI must be an Aura neo4j+s:// or bolt+s:// URI, or an HTTPS Query API URI."
+    );
   }
 
   // neo4j+s URIs describe the Bolt endpoint (usually port 7687), not HTTPS.
-  const host = parsedUri.protocol === "neo4j+s:"
+  const host = boltProtocols.includes(parsedUri.protocol)
     ? parsedUri.hostname
     : parsedUri.host;
   const endpoint = `https://${host}/db/${encodeURIComponent(database)}/query/v2`;
@@ -260,7 +266,15 @@ async function queryGraph(statement, parameters = {}) {
       hostname: parsedUri.hostname,
     });
 
-    throw err;
+    if (err.name === "AbortError") {
+      throw new Error(
+        `Neo4j request timed out after ${NEO4J_REQUEST_TIMEOUT_MS / 1000} seconds. Check that the Aura instance is running and reachable.`
+      );
+    }
+
+    throw new Error(
+      `Could not reach Neo4j at ${parsedUri.hostname}: ${err.cause?.code || err.message}`
+    );
   } finally {
     clearTimeout(timeout);
   }
@@ -281,17 +295,21 @@ async function queryGraph(statement, parameters = {}) {
   }
 
   if (!response.ok) {
-    throw new Error(
-      `Neo4j request failed (${response.status}): ${JSON.stringify(
-        result.errors || result
-      )}`
-    );
+    const errors = Array.isArray(result.errors)
+      ? result.errors
+          .map(({ code, message }) => [code, message].filter(Boolean).join(": "))
+          .filter(Boolean)
+          .join("; ")
+      : result.message || response.statusText;
+    throw new Error(`Neo4j request failed (${response.status}): ${errors}`);
   }
 
   if (result.errors?.length) {
     throw new Error(
       `Neo4j query failed: ${result.errors
-        .map((error) => error.message)
+        .map(({ code, message }) =>
+          [code, message].filter(Boolean).join(": ")
+        )
         .join("; ")}`
     );
   }

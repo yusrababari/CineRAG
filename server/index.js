@@ -23,7 +23,11 @@ app.get("/api/health", async (req, res) => {
     res.json({ status: "ok", neo4j: "connected" });
   } catch (err) {
     console.error("Neo4j health check failed:", err);
-    res.status(503).json({ status: "error", neo4j: "unavailable" });
+    res.status(503).json({
+      status: "error",
+      neo4j: "unavailable",
+      error: err instanceof Error ? err.message : "Unknown Neo4j error",
+    });
   }
 });
 
