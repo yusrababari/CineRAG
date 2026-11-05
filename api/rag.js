@@ -823,6 +823,19 @@ export function cleanAnswer(text) {
 export async function runRAG(question) {
   await getChunks();
 
+  const normalizedQuestion = normalizeText(question);
+  const isGenreRecommendation =
+    /\b(recommend|suggest)\b/.test(normalizedQuestion) &&
+    movieData.movies.some((movie) =>
+      movie.genres.some((genre) =>
+        normalizedQuestion.includes(normalizeText(genre))
+      )
+    );
+
+  if (isGenreRecommendation) {
+    return answerLocally(question);
+  }
+
   if (!process.env.OPENROUTER_API_KEY?.trim()) {
     return answerLocally(question);
   }
