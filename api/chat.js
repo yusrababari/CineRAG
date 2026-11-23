@@ -22,7 +22,7 @@ export default async function handler(req, res) {
       .status(200)
       .json({
         message:
-          "CineRAG API is running. Chat works without an API key using local movie data. Send a POST request to /api/chat with {\"question\": \"...\"}.",
+          "CineRAG API is running. Configure Ollama locally or set OPENROUTER_API_KEY for OpenRouter. Send a POST request to /api/chat with {\"question\": \"...\"}.",
       });
   }
 

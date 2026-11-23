@@ -16,6 +16,7 @@ let openrouter = null;
 const EMBEDDING_MODEL = "openai/text-embedding-3-small";
 const EMBEDDING_BATCH_SIZE = 32;
 const NEO4J_REQUEST_TIMEOUT_MS = 15000;
+const DEFAULT_OLLAMA_MODEL = "qwen3.5:4b";
 
 /* -------------------------------------------------------------------------- */
 /* OpenRouter client                                                          */
@@ -63,6 +64,69 @@ function formatOpenRouterError(err) {
       : "Unknown provider error";
 
   return `OpenRouter request failed${status ? ` (${status})` : ""}: ${detail}`;
+}
+
+async function answerWithOllama(question, movieContext) {
+  const baseUrl = (
+    process.env.OLLAMA_BASE_URL?.trim() || "http://127.0.0.1:11434"
+  ).replace(/\/+$/, "");
+  const model = process.env.OLLAMA_MODEL?.trim() || DEFAULT_OLLAMA_MODEL;
+  let response;
+
+  try {
+    response = await fetch(`${baseUrl}/api/chat`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model,
+        stream: false,
+        think: false,
+        messages: [
+          {
+            role: "system",
+            content:
+              "You are CineRAG, a friendly movie assistant. Answer briefly and clearly, using only the supplied movie data. If it does not contain the answer, say you couldn't find it in the movie database. Do not invent movie facts.",
+          },
+          {
+            role: "user",
+            content: `MOVIE DATA:\n${movieContext}\n\nQUESTION: ${question}`,
+          },
+        ],
+      }),
+    });
+  } catch (err) {
+    throw new Error(
+      `Could not connect to Ollama at ${baseUrl}. Start Ollama and check that it is reachable. ${
+        err instanceof Error ? err.message : ""
+      }`.trim()
+    );
+  }
+
+  let result;
+  try {
+    result = await response.json();
+  } catch {
+    throw new Error(`Ollama returned an invalid response (${response.status}).`);
+  }
+
+  if (!response.ok) {
+    if (response.status === 404) {
+      throw new Error(
+        `Ollama model "${model}" was not found. Check the name with "ollama list" and make sure the model is available.`
+      );
+    }
+
+    const detail =
+      typeof result?.error === "string" ? result.error : "Unknown Ollama error";
+    throw new Error(`Ollama request failed (${response.status}): ${detail}`);
+  }
+
+  const answer = result?.message?.content;
+  if (typeof answer !== "string" || !answer.trim()) {
+    throw new Error("Ollama returned an empty chat response.");
+  }
+
+  return cleanAnswer(answer);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -842,6 +906,16 @@ export function cleanAnswer(text) {
 export async function runRAG(question) {
   await getChunks();
 
+  const apiKey = process.env.OPENROUTER_API_KEY?.trim();
+  const provider = process.env.CHAT_PROVIDER?.trim().toLowerCase();
+  if (provider && provider !== "ollama" && provider !== "openrouter") {
+    throw new Error('CHAT_PROVIDER must be "ollama" or "openrouter".');
+  }
+
+  if (provider === "ollama" || (!provider && !apiKey)) {
+    return answerWithOllama(question, answerLocally(question));
+  }
+
   const normalizedQuestion = normalizeText(question);
   const isGenreRecommendation =
     /\b(recommend|suggest)\b/.test(normalizedQuestion) &&
@@ -852,10 +926,6 @@ export async function runRAG(question) {
     );
 
   if (isGenreRecommendation) {
-    return answerLocally(question);
-  }
-
-  if (!process.env.OPENROUTER_API_KEY?.trim()) {
     return answerLocally(question);
   }
 

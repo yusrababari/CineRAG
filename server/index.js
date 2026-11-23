@@ -15,7 +15,7 @@ app.use(express.json());
 
 app.get("/", (req, res) => {
   res.send(
-    "CineRAG server is running. Chat works without an API key using local movie data; configure OPENROUTER_API_KEY for AI-generated responses."
+    "CineRAG server is running. Chat uses Ollama locally when no OpenRouter key is set; configure CHAT_PROVIDER=ollama to select the local model."
   );
 });
 
