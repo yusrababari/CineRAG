@@ -22,9 +22,9 @@ const NEO4J_REQUEST_TIMEOUT_MS = 15000;
 /* -------------------------------------------------------------------------- */
 
 function getOpenRouter() {
-  if (!process.env.OPENROUTER_API_KEY) {
+  if (!process.env.OPENROUTER_API_KEY?.trim()) {
     throw new Error(
-      "OPENROUTER_API_KEY is not set. Add it to your environment or project-root .env file."
+      "OpenRouter requires OPENROUTER_API_KEY. Chat still works without a key using local movie data."
     );
   }
 
@@ -34,7 +34,7 @@ function getOpenRouter() {
       : process.env.SITE_URL || "http://localhost:5173";
 
     openrouter = new OpenAI({
-      apiKey: process.env.OPENROUTER_API_KEY,
+      apiKey: process.env.OPENROUTER_API_KEY.trim(),
       baseURL: "https://openrouter.ai/api/v1",
       defaultHeaders: {
         "HTTP-Referer": siteUrl,
@@ -44,6 +44,25 @@ function getOpenRouter() {
   }
 
   return openrouter;
+}
+
+function formatOpenRouterError(err) {
+  const status = Number.isInteger(err?.status) ? err.status : null;
+
+  if (status === 401 || status === 403) {
+    return "OpenRouter authentication failed. Check OPENROUTER_API_KEY, or remove it to use local movie search.";
+  }
+
+  if (status === 429) {
+    return "OpenRouter rate or usage limit reached. Try again later, or remove the key to use local movie search.";
+  }
+
+  const detail =
+    typeof err?.message === "string" && err.message.trim()
+      ? err.message.trim()
+      : "Unknown provider error";
+
+  return `OpenRouter request failed${status ? ` (${status})` : ""}: ${detail}`;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -869,22 +888,27 @@ export async function runRAG(question) {
     context = "No relevant movie data was found.";
   }
 
-  const completion = await getOpenRouter().chat.completions.create({
-    model: process.env.OPENROUTER_MODEL || "openai/gpt-4o-mini",
-    temperature: 0,
-    messages: [
-      {
-        role: "system",
-        content:
-          "You are CineRAG, a friendly movie assistant. Answer in short, plain text with a few emojis (🎬 🍿 ⭐ 👍). Put each movie on its own block: title and year on the first line, then genre, rating, and other useful details on separate lines. Leave a blank line between movies. Do NOT use markdown symbols such as *, **, #, or backticks. Prefer the Movie database section over the notes. Answer only from the provided data. If the answer is not in the data, say you couldn't find it in the movie database.",
-      },
-      {
-        role: "user",
-        content: `DATA:\n${context}\n\nQUESTION: ${question}`,
-      },
-    ],
-    max_tokens: 500,
-  });
+  let completion;
+  try {
+    completion = await getOpenRouter().chat.completions.create({
+      model: process.env.OPENROUTER_MODEL || "openai/gpt-4o-mini",
+      temperature: 0,
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are CineRAG, a friendly movie assistant. Answer in short, plain text with a few emojis (🎬 🍿 ⭐ 👍). Put each movie on its own block: title and year on the first line, then genre, rating, and other useful details on separate lines. Leave a blank line between movies. Do NOT use markdown symbols such as *, **, #, or backticks. Prefer the Movie database section over the notes. Answer only from the provided data. If the answer is not in the data, say you couldn't find it in the movie database.",
+        },
+        {
+          role: "user",
+          content: `DATA:\n${context}\n\nQUESTION: ${question}`,
+        },
+      ],
+      max_tokens: 500,
+    });
+  } catch (err) {
+    throw new Error(formatOpenRouterError(err));
+  }
 
   const answer = completion.choices[0]?.message?.content;
 

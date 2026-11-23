@@ -20,7 +20,10 @@ export default async function handler(req, res) {
   if (req.method === "GET") {
     return res
       .status(200)
-      .json({ message: "CineRAG API is running. Send a POST request to /api/chat with {\"question\": \"...\"}." });
+      .json({
+        message:
+          "CineRAG API is running. Chat works without an API key using local movie data. Send a POST request to /api/chat with {\"question\": \"...\"}.",
+      });
   }
 
   if (req.method !== "POST") {

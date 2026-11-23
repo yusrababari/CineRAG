@@ -14,7 +14,9 @@ app.use(cors());
 app.use(express.json());
 
 app.get("/", (req, res) => {
-  res.send("CineRAG server is running. Configure OPENROUTER_API_KEY to use chat.");
+  res.send(
+    "CineRAG server is running. Chat works without an API key using local movie data; configure OPENROUTER_API_KEY for AI-generated responses."
+  );
 });
 
 app.get("/api/health", async (req, res) => {
