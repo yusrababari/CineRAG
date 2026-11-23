@@ -66,11 +66,24 @@ function getInitialTheme() {
   }
 }
 
+function getInitialAccentHue() {
+  try {
+    const storedHue = localStorage.getItem("cinerag-accent-hue");
+    const hue = Number(storedHue);
+    return storedHue !== null && Number.isFinite(hue) && hue >= 0 && hue <= 359
+      ? hue
+      : 282;
+  } catch {
+    return 282;
+  }
+}
+
 export default function Chat() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [theme, setTheme] = useState(getInitialTheme);
+  const [accentHue, setAccentHue] = useState(getInitialAccentHue);
   const [toast, setToast] = useState("");
   const messagesEndRef = useRef(null);
   const toastTimer = useRef(null);
@@ -80,15 +93,17 @@ export default function Chat() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isTyping]);
 
-  // Apply + remember the theme (the CSS reads [data-theme="light"] on <html>)
+  // Apply and remember the theme and accent color.
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
+    document.documentElement.style.setProperty("--accent-hue", String(accentHue));
     try {
       localStorage.setItem("cinerag-theme", theme);
+      localStorage.setItem("cinerag-accent-hue", String(accentHue));
     } catch {
       /* storage can be blocked; ignore */
     }
-  }, [theme]);
+  }, [theme, accentHue]);
 
   useEffect(() => () => clearTimeout(toastTimer.current), []);
 
@@ -209,6 +224,19 @@ export default function Chat() {
           </div>
 
           <div className="header-actions">
+            <div className="theme-control">
+              <label htmlFor="accent-hue">Color</label>
+              <input
+                id="accent-hue"
+                type="range"
+                min="0"
+                max="359"
+                value={accentHue}
+                onChange={(e) => setAccentHue(Number(e.target.value))}
+                aria-label="Accent color"
+                title="Change accent color"
+              />
+            </div>
             <button
               type="button"
               className="icon-btn"
@@ -284,7 +312,7 @@ export default function Chat() {
         <form className="chat-input-area" onSubmit={handleSend}>
           <input
             type="text"
-            placeholder="> type your movie question..."
+            placeholder="Ask CineRAG about a movie..."
             value={input}
             onChange={(e) => setInput(e.target.value)}
             aria-label="Your movie question"
