@@ -26,7 +26,7 @@ function formatAnswer(text) {
 }
 
 const suggestions = [
-  "Recommend a sci-fi thriller",
+  "Find a sci-fi thriller",
   "Who directed The Signal Room?",
   "Who starred in The Beekeeper's Ledger?",
   "What is Iron Harvest about?",
@@ -46,7 +46,7 @@ function cleanAnswer(text) {
     .split("\n")
     .map((line) => {
       const bullet = line.trim().match(/^[-*•]\s+(.*)$/);
-      return bullet ? "🍿 " + bullet[1] : line.trim();
+      return bullet ? `• ${bullet[1]}` : line.trim();
     })
     .join("\n")
     .replace(/[ \t]{2,}/g, " ")
@@ -72,9 +72,9 @@ function getInitialAccentHue() {
     const hue = Number(storedHue);
     return storedHue !== null && Number.isFinite(hue) && hue >= 0 && hue <= 359
       ? hue
-      : 282;
+      : 38;
   } catch {
-    return 282;
+    return 38;
   }
 }
 
@@ -148,7 +148,7 @@ export default function Chat() {
         {
           id: Date.now() + 1,
           sender: "bot",
-          text: `⚠️ ${err instanceof Error ? err.message : "I couldn't reach the server. Please try again!"}`,
+          text: `Couldn't get an answer: ${err instanceof Error ? err.message : "I couldn't reach the server. Please try again."}`,
           time: timeNow(),
         },
       ]);
@@ -176,13 +176,13 @@ export default function Chat() {
   return (
     <div className="app-shell">
       <aside className={`sidebar${history.length === 0 ? " is-empty" : ""}`}>
-        <p className="sidebar-title">History</p>
+        <p className="sidebar-title">Recent questions</p>
 
         {history.length === 0 ? (
           <p className="sidebar-empty">Your questions will show up here.</p>
         ) : (
           <ul className="sidebar-list">
-            {history.map((m) => (
+            {history.map((m, index) => (
               <li key={m.id}>
                 <button
                   type="button"
@@ -191,7 +191,7 @@ export default function Chat() {
                   disabled={isTyping}
                   title="Ask again"
                 >
-                  <span className="sidebar-icon">💬</span>
+                  <span className="sidebar-icon">{String(index + 1).padStart(2, "0")}</span>
                   <span className="sidebar-label">{m.text}</span>
                 </button>
               </li>
@@ -206,26 +206,26 @@ export default function Chat() {
         <div className="chat-header">
           <button
             type="button"
-            className="icon-btn"
+            className="new-chat-btn"
             onClick={goHome}
             disabled={messages.length === 0 && !isTyping}
-            aria-label="Home"
-            title="Back to start"
+            title="Start a new chat"
           >
-            🏠
+            <span aria-hidden="true">+</span>
+            New chat
           </button>
 
           <div className="chat-header-text">
-            <h2>🎬 CineRAG</h2>
+            <h2>CineRAG</h2>
             <p>
               <span className={`status-dot${isTyping ? " busy" : ""}`} />
-              {isTyping ? "Thinking..." : "Ask about a movie, actor, or plot"}
+              {isTyping ? "Searching the collection..." : "Films, filmmakers, and stories"}
             </p>
           </div>
 
           <div className="header-actions">
             <div className="theme-control">
-              <label htmlFor="accent-hue">Color</label>
+              <label htmlFor="accent-hue">Accent</label>
               <input
                 id="accent-hue"
                 type="range"
@@ -242,9 +242,9 @@ export default function Chat() {
               className="icon-btn"
               onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
               aria-label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
-              title="Toggle theme"
+              title={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
             >
-              {theme === "dark" ? "☀️" : "🌙"}
+              {theme === "dark" ? "Light" : "Dark"}
             </button>
           </div>
         </div>
@@ -252,15 +252,16 @@ export default function Chat() {
         <div className="chat-messages" role="log" aria-live="polite">
           {messages.length === 0 && !isTyping && (
             <div className="empty-state">
-              <h3>What do you want to watch?</h3>
-              <p>Ask about a movie, actor, or plot, or try one of the ideas below.</p>
+              <p className="empty-eyebrow">CINERAG / FILM INDEX</p>
+              <h3>Where should we start?</h3>
+              <p>Ask about a film, a filmmaker, or a particular year.</p>
             </div>
           )}
 
           {messages.map((msg) => (
             <div key={msg.id} className={`message-row ${msg.sender}`}>
               <div className="avatar" aria-hidden="true">
-                {msg.sender === "bot" ? "🎬" : "🙂"}
+                {msg.sender === "bot" ? "CR" : "YOU"}
               </div>
               <div className={`message ${msg.sender}`}>
                 <p>
@@ -280,7 +281,7 @@ export default function Chat() {
 
           {isTyping && (
             <div className="message-row bot">
-              <div className="avatar" aria-hidden="true">🎬</div>
+              <div className="avatar" aria-hidden="true">CR</div>
               <div className="message bot typing-indicator">
                 Generating response - this may take a few seconds
                 <span className="loading-dots">

@@ -1,20 +1,11 @@
-/* ==========================================================================
-   Chat UI v2: dark ink + hot-pink-to-violet gradients
-   Dark   = refs 2 + 4 (floating app on a crimson backdrop, glow at the top,
-            outlined chips, gradient user bubbles, dark bot bubbles)
-   Light  = ref 1 (soft blush pastels, white bubbles)
-   Same class names as before; no HTML changes needed.
-   Perf tip: swap this @import for <link> tags in your <head>.
-   ========================================================================== */
-
-
+/* CineRAG shared layout and component styles. */
 /* ==========================================================================
    Tokens
    ========================================================================== */
 :root {
   color-scheme: dark;
 
-  /* Surfaces: ink with a faint blue cast, like ref 2's panels */
+  /* Base surfaces */
   --bg-page:     #0b0c14;
   --bg-shell:    #0f1019;
   --bg-sidebar:  #12131d;
@@ -27,7 +18,7 @@
   --text-muted:     #9a9db3;
   --text-on-accent: #ffffff;
 
-  /* Brand gradient: coral-pink > magenta > violet (refs 2 + 4) */
+  /* Accent colors */
   --pink:    #e11d6a;              /* AA with white text */
   --magenta: #b327d6;
   --violet:  #7c3aed;
@@ -49,7 +40,7 @@
   --code-bg:   #07080d;
   --code-text: #ffd1e8;
 
-  /* Backdrop behind the floating app (ref 2) */
+  /* Page background */
   --backdrop: linear-gradient(135deg, #c9294f 0%, #5a1f4a 32%, #1a1630 62%, #0b0c14 100%);
 
   /* Depth + shape */
@@ -62,12 +53,12 @@
   --column-width: 760px;
   --gutter: max(16px, calc((100% - var(--column-width)) / 2));
 
-  --font-body:  'Sora', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-mono:  'Fira Code', ui-monospace, Menlo, Consolas, monospace;
+  --font-body:  system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono:  ui-monospace, Menlo, Consolas, monospace;
   --ease: cubic-bezier(.2, .8, .2, 1);
 }
 
-/* Light theme: ref 1, blush pastels */
+/* Light theme base values */
 [data-theme="light"] {
   color-scheme: light;
 
@@ -137,7 +128,7 @@ html, body {
 .sidebar::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 8px; }
 
 /* ==========================================================================
-   App shell: full-bleed on phones, floating rounded app on desktop (ref 2)
+   App shell: centered desktop window, full-bleed on phones
    ========================================================================== */
 .app-shell {
   display: flex;
@@ -155,17 +146,7 @@ html, body {
   min-width: 0;
   height: 100%;
   overflow: hidden;
-  background:
-    /* ref 4: soft magenta/violet bloom coming from the top edge */
-    radial-gradient(ellipse 75% 32% at 50% -6%, rgba(255, 77, 158, .30), rgba(124, 58, 237, .16) 50%, transparent 75%),
-    radial-gradient(ellipse 50% 40% at 100% 100%, rgba(124, 58, 237, .10), transparent 70%),
-    var(--bg-shell);
-}
-
-[data-theme="light"] .chat-container {
-  background:
-    radial-gradient(ellipse 75% 30% at 50% -6%, rgba(255, 150, 190, .45), transparent 70%),
-    var(--bg-shell);
+  background: var(--bg-shell);
 }
 
 #root > .chat-container { max-width: 1200px; }
@@ -316,7 +297,7 @@ html, body {
   to   { opacity: 1; transform: none; }
 }
 
-/* Bot avatar: rounded gradient tile like ref 4's logo; user avatar: ring */
+/* Compact text marks keep the speaker labels unobtrusive. */
 .avatar {
   flex-shrink: 0;
   display: grid;
@@ -347,7 +328,7 @@ html, body {
   overflow-wrap: anywhere;
 }
 
-/* Received: dark card with a hairline, square corner at the tail (ref 4) */
+/* Received messages sit directly on the conversation surface. */
 .message.bot {
   align-self: flex-start;
   color: var(--text);
@@ -357,7 +338,7 @@ html, body {
   box-shadow: var(--shadow-sm);
 }
 
-/* Sent: the gradient (refs 2 + 4) */
+/* Sent messages use a quiet accent tint. */
 .message.user {
   align-self: flex-end;
   color: var(--text-on-accent);
@@ -442,7 +423,7 @@ html, body {
 .message pre code { padding: 0; color: inherit; background: none; }
 
 /* ==========================================================================
-   Empty state: a morphing gradient orb (ref 4's hero), the one big moment
+   Empty state
    ========================================================================== */
 .empty-state {
   margin: auto;
@@ -450,30 +431,6 @@ html, body {
   text-align: center;
   color: var(--text-muted);
   line-height: 1.6;
-}
-
-.empty-state::before {
-  content: '';
-  display: block;
-  width: 150px;
-  height: 150px;
-  margin: 0 auto 28px;
-  border-radius: 58% 42% 55% 45% / 50% 55% 45% 50%;
-  background:
-    repeating-radial-gradient(circle at 50% 50%, rgba(255, 255, 255, .20) 0 1px, transparent 1px 9px),
-    radial-gradient(circle at 28% 28%, #ffa0c8 0%, transparent 42%),
-    radial-gradient(circle at 75% 72%, var(--violet) 0%, transparent 58%),
-    radial-gradient(circle at 50% 50%, var(--pink) 0%, #3a0b4f 100%);
-  box-shadow:
-    0 0 60px color-mix(in srgb, var(--glow) 45%, transparent),
-    inset 0 0 30px rgba(255, 255, 255, .15);
-  animation: orb 9s ease-in-out infinite;
-}
-
-@keyframes orb {
-  0%, 100% { border-radius: 58% 42% 55% 45% / 50% 55% 45% 50%; transform: rotate(0deg); }
-  33%      { border-radius: 45% 55% 42% 58% / 58% 45% 55% 42%; transform: rotate(40deg); }
-  66%      { border-radius: 52% 48% 60% 40% / 44% 58% 42% 56%; transform: rotate(-30deg); }
 }
 
 .empty-state h3 {
@@ -547,7 +504,7 @@ html, body {
 .sentiment-neutral  { background: color-mix(in srgb, var(--text-muted) 16%, transparent); color: var(--text-muted); }
 
 /* ==========================================================================
-   Suggestion chips: outlined cards like ref 4
+   Quick questions
    ========================================================================== */
 .suggestions-container {
   display: flex;
@@ -574,9 +531,7 @@ html, body {
 }
 
 .suggestion-chip::before {
-  content: '✦';
-  font-size: 12px;
-  color: var(--glow);
+  content: none;
 }
 
 .suggestion-chip:hover {
@@ -632,7 +587,7 @@ html, body {
 @keyframes blink { to { visibility: hidden; } }
 
 /* ==========================================================================
-   Composer: outlined pill + gradient send (ref 4)
+   Composer
    ========================================================================== */
 .chat-input-area {
   display: flex;
@@ -713,7 +668,7 @@ html, body {
 .chat-input-area button:disabled { opacity: .45; cursor: not-allowed; filter: none; transform: none; box-shadow: none; }
 
 /* ==========================================================================
-   Sidebar: conversation cards, gradient on hover/active (ref 2)
+   Sidebar: recent questions
    ========================================================================== */
 .sidebar {
   display: flex;
@@ -754,24 +709,6 @@ html, body {
   transition: border-color .15s, transform .15s;
 }
 
-/* Gradient fill fades in on hover/active without animating the gradient itself */
-.sidebar-link::before {
-  content: '';
-  position: absolute;
-  inset: -1px;
-  z-index: -1;
-  background: var(--grad);
-  border-radius: inherit;
-  opacity: 0;
-  transition: opacity .2s;
-}
-
-.sidebar-link:hover::before,
-.sidebar-link[aria-current]::before { opacity: 1; }
-
-.sidebar-link:hover,
-.sidebar-link[aria-current] { color: var(--text-on-accent); transform: translateX(2px); }
-
 .sidebar-icon {
   flex-shrink: 0;
   display: grid;
@@ -783,12 +720,6 @@ html, body {
   border: 1px solid color-mix(in srgb, var(--glow) 40%, transparent);
   border-radius: 50%;
   transition: background .2s, border-color .2s;
-}
-
-.sidebar-link:hover .sidebar-icon,
-.sidebar-link[aria-current] .sidebar-icon {
-  background: rgba(255, 255, 255, .20);
-  border-color: rgba(255, 255, 255, .45);
 }
 
 .sidebar-label { flex: 1; min-width: 0; }
@@ -872,7 +803,6 @@ html, body {
 
 @media (forced-colors: active) {
   .message.user, .chat-input-area button, .sidebar-link { border: 1px solid ButtonText; }
-  .sidebar-link::before { display: none; }
 }
 /* ==========================================================================
    Additions for the updated Chat component. Paste at the END of index.css.
@@ -915,71 +845,72 @@ html, body {
   .sidebar button.sidebar-link { width: auto; }
   .sidebar-label { max-width: 200px; }
 }
-/* Pastel AI workspace with a user-adjustable accent hue. */
+/* Editorial film-catalogue interface with a user-adjustable accent hue. */
 :root {
-  --font-body: 'Sora', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-mono: 'Fira Code', ui-monospace, Menlo, Consolas, monospace;
-  --pink: hsl(var(--accent-hue, 282) 78% 53%);
-  --magenta: hsl(var(--accent-hue, 282) 76% 62%);
-  --violet: hsl(var(--accent-hue, 282) 72% 45%);
-  --glow: hsl(var(--accent-hue, 282) 84% 68%);
-  --pink-text: hsl(var(--accent-hue, 282) 82% 72%);
-  --grad: linear-gradient(135deg, var(--pink), var(--magenta));
-  --grad-warm: linear-gradient(135deg, var(--pink), var(--violet));
+  --font-body: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: ui-monospace, Menlo, Consolas, monospace;
+  --pink: hsl(var(--accent-hue, 38) 66% 41%);
+  --magenta: var(--pink);
+  --violet: var(--pink);
+  --glow: hsl(var(--accent-hue, 38) 72% 49%);
+  --pink-text: var(--pink);
+  --grad: var(--pink);
+  --grad-warm: var(--pink);
   --column-width: 700px;
-  --r-app: 26px;
+  --r-app: 17px;
 }
 
+:root,
 [data-theme="dark"] {
   color-scheme: dark;
-  --bg-page: #11101a;
-  --bg-shell: #191824;
-  --bg-sidebar: #171622;
-  --bg-card: #22202e;
-  --bg-bot: #242230;
-  --bg-input: #1c1a28;
-  --text: #f7f4fc;
-  --text-muted: #a9a4b7;
+  --bg-page: #111310;
+  --bg-shell: #1b1d19;
+  --bg-sidebar: #171916;
+  --bg-card: #242720;
+  --bg-bot: #242720;
+  --bg-input: #22241f;
+  --text: #f1efe8;
+  --text-muted: #aaa79d;
   --text-on-accent: #fff;
-  --line: #302d40;
-  --line-strong: #403b54;
-  --ring: color-mix(in srgb, var(--pink) 24%, transparent);
-  --code-bg: #100f17;
-  --code-text: #f2dfff;
-  --backdrop:
-    radial-gradient(ellipse at 18% 12%, color-mix(in srgb, var(--pink) 22%, transparent), transparent 36%),
-    radial-gradient(ellipse at 86% 88%, rgba(86, 93, 185, .2), transparent 34%),
-    #11101a;
-  --shadow-app: 0 28px 80px rgba(8, 7, 15, .46);
-  --shadow-sm: 0 2px 8px rgba(8, 7, 15, .22);
+  --pink: hsl(var(--accent-hue, 38) 72% 62%);
+  --magenta: var(--pink);
+  --violet: var(--pink);
+  --glow: hsl(var(--accent-hue, 38) 78% 70%);
+  --pink-text: var(--glow);
+  --line: #34372f;
+  --line-strong: #484b42;
+  --ring: color-mix(in srgb, var(--pink) 20%, transparent);
+  --code-bg: #141612;
+  --code-text: #e7dfd0;
+  --backdrop: #111310;
+  --shadow-app: 0 20px 55px rgba(0, 0, 0, .24);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, .14);
 }
 
 [data-theme="light"] {
   color-scheme: light;
-  --bg-page: #f3effa;
-  --bg-shell: rgba(255, 255, 255, .88);
-  --bg-sidebar: rgba(249, 246, 253, .9);
-  --bg-card: #fff;
-  --bg-bot: #fff;
-  --bg-input: #fff;
-  --text: #302b3d;
-  --text-muted: #827a91;
+  --bg-page: #e9e6de;
+  --bg-shell: #faf9f5;
+  --bg-sidebar: #f3f1e9;
+  --bg-card: #fffefa;
+  --bg-bot: #fffefa;
+  --bg-input: #fffefa;
+  --text: #292923;
+  --text-muted: #77766c;
   --text-on-accent: #fff;
-  --pink: hsl(var(--accent-hue, 282) 76% 45%);
-  --magenta: hsl(var(--accent-hue, 282) 70% 57%);
-  --violet: hsl(var(--accent-hue, 282) 72% 40%);
-  --pink-text: hsl(var(--accent-hue, 282) 74% 40%);
-  --line: #e8e1f0;
-  --line-strong: #d9cfe6;
-  --ring: color-mix(in srgb, var(--pink) 18%, transparent);
-  --code-bg: #282333;
-  --code-text: #f5eafa;
-  --backdrop:
-    radial-gradient(ellipse at 14% 12%, color-mix(in srgb, var(--pink) 16%, transparent), transparent 34%),
-    radial-gradient(ellipse at 88% 84%, rgba(138, 165, 230, .2), transparent 38%),
-    #f3effa;
-  --shadow-app: 0 28px 76px rgba(80, 57, 110, .16);
-  --shadow-sm: 0 2px 8px rgba(47, 35, 67, .06);
+  --pink: hsl(var(--accent-hue, 38) 66% 39%);
+  --magenta: var(--pink);
+  --violet: var(--pink);
+  --glow: hsl(var(--accent-hue, 38) 70% 46%);
+  --pink-text: var(--pink);
+  --line: #e0ddd4;
+  --line-strong: #cbc7bc;
+  --ring: color-mix(in srgb, var(--pink) 16%, transparent);
+  --code-bg: #2a2923;
+  --code-text: #f3efe5;
+  --backdrop: #e9e6de;
+  --shadow-app: 0 20px 55px rgba(45, 40, 30, .1);
+  --shadow-sm: 0 1px 3px rgba(45, 40, 30, .08);
 }
 
 html,
@@ -1002,17 +933,61 @@ body {
 }
 
 .chat-container {
-  background:
-    radial-gradient(ellipse 75% 28% at 50% 0%, color-mix(in srgb, var(--pink) 12%, transparent), transparent 72%),
-    var(--bg-shell);
+  background: var(--bg-shell);
 }
-
-.chat-container::after { content: none; }
 
 .sidebar {
   flex-basis: 246px;
   padding: 24px 16px;
   background: var(--bg-sidebar);
+}
+
+.sidebar-title {
+  padding: 0 8px 12px;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.sidebar-list { gap: 2px; }
+
+.sidebar-link {
+  gap: 10px;
+  padding: 10px 8px;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  font-size: 13px;
+}
+
+.sidebar-link::after { content: '›'; }
+
+.sidebar-link:hover,
+.sidebar-link[aria-current] {
+  color: var(--text);
+  background: var(--bg-card);
+  transform: none;
+}
+
+.sidebar-link:hover .sidebar-icon,
+.sidebar-link[aria-current] .sidebar-icon {
+  color: var(--pink);
+  background: transparent;
+  border-color: transparent;
+}
+
+.sidebar-icon {
+  width: 25px;
+  height: 25px;
+  color: var(--pink);
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  font-family: var(--font-mono);
+  font-size: 10px;
 }
 
 .chat-header {
@@ -1032,9 +1007,37 @@ body {
 .chat-header h2::after { content: none; }
 .chat-header p { font-size: 12px; }
 
+.new-chat-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 36px;
+  padding: 0 10px;
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font: 500 11px var(--font-body);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.new-chat-btn span {
+  color: var(--pink);
+  font-size: 18px;
+  line-height: 1;
+}
+
+.new-chat-btn:hover { color: var(--text); border-color: var(--line-strong); }
+.new-chat-btn:disabled { opacity: .45; cursor: not-allowed; }
+
+.status-dot,
+.status-dot.busy { background: var(--pink); color: var(--pink); }
+.status-dot::after { display: none; }
+
 .header-actions {
   align-items: center;
-  gap: 12px;
+  gap: 8px;
 }
 
 .theme-control {
@@ -1045,8 +1048,10 @@ body {
 }
 
 .theme-control label {
-  font-size: 11px;
-  font-weight: 600;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
 }
 
 .theme-control input[type="range"] {
@@ -1089,10 +1094,14 @@ body {
 }
 
 .icon-btn {
-  width: 38px;
-  height: 38px;
-  border-radius: 13px;
-  background: var(--bg-card);
+  width: auto;
+  min-width: 62px;
+  height: 34px;
+  padding: 0 9px;
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 600;
 }
 
 .chat-messages {
@@ -1104,30 +1113,73 @@ body {
 .message {
   font-size: 14px;
   line-height: 1.65;
-  border-radius: 18px;
+  border-radius: 12px;
 }
 
 .message.bot {
-  background: var(--bg-bot);
-  border-color: var(--line);
+  padding-left: 0;
+  color: var(--text);
+  background: transparent;
+  border: 0;
+  box-shadow: none;
 }
 
 .message.user {
-  background: var(--grad);
-  box-shadow: 0 7px 20px color-mix(in srgb, var(--pink) 22%, transparent);
+  color: var(--text);
+  background: color-mix(in srgb, var(--pink) 12%, var(--bg-card));
+  border: 1px solid color-mix(in srgb, var(--pink) 22%, var(--line));
+  box-shadow: none;
+}
+
+.avatar {
+  width: 28px;
+  height: 28px;
+  color: var(--bg-shell);
+  background: var(--pink);
+  border-radius: 7px;
+  box-shadow: none;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.message-row.user .avatar {
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid var(--line-strong);
+  border-radius: 7px;
+}
+
+.empty-eyebrow {
+  margin-bottom: 12px;
+  color: var(--pink-text);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .14em;
 }
 
 .empty-state h3 {
+  font-family: Georgia, 'Times New Roman', serif;
   font-size: clamp(24px, 3vw, 32px);
+  font-weight: 400;
   letter-spacing: -.04em;
 }
 
 .empty-state p { font-size: 14px; }
 
 .suggestion-chip {
-  padding: 9px 14px;
+  padding: 8px 11px;
+  color: var(--text-muted);
   border-color: var(--line);
-  background: color-mix(in srgb, var(--bg-card) 68%, transparent);
+  border-radius: 8px;
+  background: transparent;
+}
+
+.suggestion-chip:hover {
+  color: var(--text);
+  border-color: var(--pink);
+  background: color-mix(in srgb, var(--pink) 7%, var(--bg-card));
+  transform: none;
 }
 
 .chat-input-area {
@@ -1139,35 +1191,30 @@ body {
 .chat-input-area input,
 .chat-input-area textarea {
   padding: 13px 18px;
+  font-size: 15px;
   border-color: var(--line);
-  border-radius: 17px;
-  box-shadow: 0 6px 22px rgba(20, 15, 35, .05);
+  border-radius: 9px;
+  box-shadow: none;
 }
 
 .chat-input-area button {
   min-width: 94px;
   min-height: 48px;
-  border-radius: 16px;
-}
-
-.chat-input-area button {
-  font-size: 14px;
+  color: var(--bg-shell);
+  background: var(--text);
+  border-radius: 9px;
+  box-shadow: none;
+  font-size: 12px;
   letter-spacing: normal;
   text-transform: none;
 }
 
-.timestamp { font-size: 11px; }
-.message-actions button { font-size: 12px; }
-.suggestion-chip::before { content: '✦'; font-size: 12px; }
-.chat-input-area input,
-.chat-input-area textarea { font-size: 15px; }
-.sidebar-title { font-size: 14px; font-weight: 600; letter-spacing: -.01em; }
-.sidebar-link { font-size: 13px; font-weight: 500; }
-.sidebar-empty { font-size: 13px; }
-.sidebar-footer { font-size: 12px; }
-.toast { font-size: 13px; }
-.char-counter { font-size: 12px; }
-.sentiment-badge { font-size: 16px; }
+.chat-input-area button:hover {
+  filter: none;
+  background: var(--pink);
+  box-shadow: none;
+  transform: none;
+}
 
 @media (max-width: 900px) {
   #root { padding: 16px; }
