@@ -15,7 +15,7 @@ app.use(express.json());
 
 app.get("/", (req, res) => {
   res.send(
-    "CineRAG server is running. Chat uses Ollama locally when no OpenRouter key is set; configure CHAT_PROVIDER=ollama to select the local model."
+    "CineRAG server is running. Chat uses local Ollama by default; configure CHAT_PROVIDER=openrouter to use OpenRouter."
   );
 });
 

@@ -25,7 +25,7 @@ const DEFAULT_OLLAMA_MODEL = "qwen3.5:4b";
 function getOpenRouter() {
   if (!process.env.OPENROUTER_API_KEY?.trim()) {
     throw new Error(
-      "OpenRouter requires OPENROUTER_API_KEY. Chat still works without a key using local movie data."
+      "OpenRouter is selected but OPENROUTER_API_KEY is missing. Set CHAT_PROVIDER=ollama to use the local model."
     );
   }
 
@@ -51,11 +51,11 @@ function formatOpenRouterError(err) {
   const status = Number.isInteger(err?.status) ? err.status : null;
 
   if (status === 401 || status === 403) {
-    return "OpenRouter authentication failed. Check OPENROUTER_API_KEY, or remove it to use local movie search.";
+    return "OpenRouter authentication failed. Check OPENROUTER_API_KEY, or set CHAT_PROVIDER=ollama to use the local model.";
   }
 
   if (status === 429) {
-    return "OpenRouter rate or usage limit reached. Try again later, or remove the key to use local movie search.";
+    return "OpenRouter rate or usage limit reached. Try again later, or set CHAT_PROVIDER=ollama to use the local model.";
   }
 
   const detail =
@@ -906,13 +906,17 @@ export function cleanAnswer(text) {
 export async function runRAG(question) {
   await getChunks();
 
-  const apiKey = process.env.OPENROUTER_API_KEY?.trim();
   const provider = process.env.CHAT_PROVIDER?.trim().toLowerCase();
   if (provider && provider !== "ollama" && provider !== "openrouter") {
     throw new Error('CHAT_PROVIDER must be "ollama" or "openrouter".');
   }
 
-  if (provider === "ollama" || (!provider && !apiKey)) {
+  const apiKey = process.env.OPENROUTER_API_KEY?.trim();
+  const useOpenRouter =
+    provider === "openrouter" ||
+    (!provider && process.env.VERCEL === "1" && Boolean(apiKey));
+
+  if (!useOpenRouter) {
     return answerWithOllama(question, answerLocally(question));
   }
 
